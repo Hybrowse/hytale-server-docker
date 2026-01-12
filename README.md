@@ -47,7 +47,7 @@
 
  ## Planned features
 
- See `ROADMAP.md` for details. Highlights:
+ See [`ROADMAP.md`](ROADMAP.md) for details. Highlights:
 
  - **MVP**: non-root runtime, startup validation, minimal healthcheck, clear docs
  - **Operations**: safer upgrades, backup guidance, better logging ergonomics
@@ -56,14 +56,14 @@
  
  ## Documentation
  
- - `docs/hytale/` — Notes from the official Hytale Server Manual
- - `docs/image/` — Image usage & configuration
+ - [`docs/hytale/`](docs/hytale/): Notes from the official Hytale Server Manual
+ - [`docs/image/`](docs/image/): Image usage & configuration
  
  ## Contributing & Security
  
- - `CONTRIBUTING.md`
- - `SECURITY.md`
+ - [`CONTRIBUTING.md`](CONTRIBUTING.md)
+ - [`SECURITY.md`](SECURITY.md)
  
  ## License
  
- See `LICENSE`.
+ See [`LICENSE`](LICENSE) and [`NOTICE`](NOTICE).
