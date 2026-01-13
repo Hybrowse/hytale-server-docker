@@ -61,7 +61,8 @@ Advanced (providers / fleets):
 | `HYTALE_ACCEPT_EARLY_PLUGINS` | `false` | If `true`, passes `--accept-early-plugins` (acknowledges unsupported early plugins). |
 | `HYTALE_ENABLE_BACKUP` | `false` | If `true`, passes `--backup`. |
 | `HYTALE_BACKUP_DIR` | *(empty)* | Passed as `--backup-dir`. |
-| `HYTALE_BACKUP_FREQUENCY_MINUTES` | *(empty)* | Passed as `--backup-frequency`. |
+| `HYTALE_BACKUP_FREQUENCY_MINUTES` | `30` | Passed as `--backup-frequency`. |
+| `HYTALE_BACKUP_MAX_COUNT` | `5` | Passed as `--backup-max-count`. |
 | `HYTALE_SERVER_SESSION_TOKEN` | *(empty)* | Passed as `--session-token` (**secret**). |
 | `HYTALE_SERVER_IDENTITY_TOKEN` | *(empty)* | Passed as `--identity-token` (**secret**). |
 | `HYTALE_AUTO_DOWNLOAD` | `false` | If `true`, downloads server files and `Assets.zip` via the official Hytale Downloader when missing. |
@@ -81,7 +82,6 @@ Advanced (providers / fleets):
 | `ENABLE_AOT` | `auto` | `auto\|true\|false\|generate` (controls `-XX:AOTCache=...`). |
 | `EXTRA_SERVER_ARGS` | *(empty)* | Extra server args appended at the end. |
 | `HYTALE_ALLOW_OP` | `true` | If `true`, enables the `/op` command. |
-| `HYTALE_BACKUP_MAX_COUNT` | *(empty)* | Passed as `--backup-max-count`. |
 | `HYTALE_BARE` | `false` | If `true`, passes `--bare`. |
 | `HYTALE_BOOT_COMMAND` | *(empty)* | Passed as `--boot-command`. |
 | `HYTALE_DISABLE_ASSET_COMPARE` | `false` | If `true`, passes `--disable-asset-compare`. |
@@ -89,7 +89,7 @@ Advanced (providers / fleets):
 | `HYTALE_DISABLE_FILE_WATCHER` | `false` | If `true`, passes `--disable-file-watcher`. |
 | `HYTALE_EARLY_PLUGINS_PATH` | *(empty)* | Passed as `--early-plugins`. |
 | `HYTALE_EVENT_DEBUG` | `false` | If `true`, passes `--event-debug`. |
-| `HYTALE_FORCE_NETWORK_FLUSH` | *(empty)* | Passed as `--force-network-flush`. |
+| `HYTALE_FORCE_NETWORK_FLUSH` | `true` | If `true`, passes `--force-network-flush`. |
 | `HYTALE_GENERATE_SCHEMA` | `false` | If `true`, passes `--generate-schema`. |
 | `HYTALE_LOG` | *(empty)* | Passed as `--log`. |
 | `HYTALE_MODS_PATH` | *(empty)* | Passed as `--mods`. |
