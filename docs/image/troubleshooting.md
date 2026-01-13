@@ -87,6 +87,33 @@ ERROR: Auto-download is not supported on arm64 because the official downloader a
 
 - Or provision server files manually: [`server-files.md`](server-files.md)
 
+## Permission denied errors on `/data`
+
+**Symptom:**
+
+```text
+cp: cannot create regular file '/data/server/./HytaleServer.jar': Permission denied
+```
+
+**Cause:** The container runs as `uid=1000` (non-root) by default. If the host directory mounted to `/data` is owned by a different user, the container cannot write to it.
+
+**Fix:** Make the host directory writable for uid 1000:
+
+```bash
+sudo chown -R 1000:1000 /path/to/your/data
+```
+
+Or, if you want to use a different uid, run the container with a matching user:
+
+```yaml
+services:
+  hytale:
+    user: "1001:1001"
+```
+
+> [!WARNING]
+> Avoid running as root (`user: "0:0"`) in production.
+
 ## Container exits immediately with "Missing server jar" or "Missing assets"
 
 **Symptom:** Container exits with clear error messages about missing files.
