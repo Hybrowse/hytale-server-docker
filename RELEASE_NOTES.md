@@ -23,13 +23,36 @@ This is the first production-grade release of the **Hytale dedicated server Dock
 - `HYTALE_AUTH_MODE=authenticated` by default.
 - Auto-download is **off by default**; enable explicitly with `HYTALE_AUTO_DOWNLOAD=true`.
 - When `HYTALE_AUTO_DOWNLOAD=true`, auto-update is **on by default** (`HYTALE_AUTO_UPDATE=true`).
-- AOT is **opt-in** and controlled via `ENABLE_AOT`.
+- AOT cache usage defaults to **best effort** (`ENABLE_AOT=auto`). A cache is used only when present and compatible.
+
+### AOT (what it is)
+
+This image can optionally use the JVM's Ahead-of-Time (AOT) cache mechanism to speed up startup.
+
+- `ENABLE_AOT=auto` (default): if an AOT cache file exists and is compatible, it will be used; otherwise the JVM should ignore it and continue.
+- `ENABLE_AOT=true`: strict diagnostics; startup fails if the cache is missing or incompatible.
+- `ENABLE_AOT=false`: disable AOT.
 
 ### Authentication (operators)
 
-In authenticated mode, the server must obtain server session tokens before it can complete the authenticated handshake with clients.
+There are two different authentication flows you may encounter:
 
-- Use the server console:
+#### 1) Downloader authentication (first start)
+
+If you enable `HYTALE_AUTO_DOWNLOAD=true`, the official Hytale Downloader will print an authorization URL + device code in the container logs on first run.
+Open that URL and complete the device-code flow once. Credentials are then stored on the `/data` volume.
+
+#### 2) Server authentication (required for player connections)
+
+In authenticated mode, the running server must obtain server session tokens before it can complete the authenticated handshake with clients.
+
+Attach to the server console:
+
+```bash
+docker compose attach hytale
+```
+
+Then run:
 
 ```text
 /auth login device
@@ -45,8 +68,16 @@ For provider-grade automation, see `docs/hytale/server-provider-auth.md` (tokens
 
 ### Known limitations
 
-- Auto-download currently supports `linux/amd64` only (the official downloader archive does not include `linux/arm64`).
-- AOT caches are architecture-specific (`linux/amd64` vs `linux/arm64`) and must match the JVM build. Use `ENABLE_AOT=auto` for best effort, or `ENABLE_AOT=true` for strict diagnostics.
+- Auto-download is currently supported on `linux/amd64` only (validated in CI). As of this release, the official downloader archive does not include a `linux/arm64` binary.
+- AOT cache files are architecture-specific (`linux/amd64` vs `linux/arm64`) and must match the JVM build. In `ENABLE_AOT=auto` mode the JVM should ignore incompatible caches and continue; use `ENABLE_AOT=true` for strict diagnostics.
+
+### Disclaimers
+
+- This is an early release of the image. While core paths are tested, not every server CLI flag / environment variable combination has been validated yet.
+- Expect frequent updates over the next days as both the upstream Hytale server and this Docker image evolve and real-world usage uncovers edge cases.
+  Consider watching the repository for updates and/or join our Discord for update notifications: https://hybrowse.gg/discord
+- Hytale (the game and server software) is Early Access. While we aim to keep this image production-grade, we cannot guarantee the server software (or this container) will be free of bugs.
+  In the worst case, bugs may lead to data loss. Regular backups are strongly recommended (and should be treated as mandatory for production).
 
 ### Security notes
 
@@ -68,6 +99,7 @@ docker compose up -d
 ### Docs
 
 - `docs/image/quickstart.md`
+- `docs/image/troubleshooting.md`
 - `docs/image/configuration.md`
 - `docs/image/server-files.md`
 - `docs/image/backups.md`
