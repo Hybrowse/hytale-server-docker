@@ -34,8 +34,13 @@ if echo "${out}" | grep -q "docs/hytale/"; then
 fi
 pass "fails fast when Assets.zip / jar missing"
 
+rm -rf "${workdir}"
+
 # Test 3: AOT strict mode fails when cache missing
+workdir="$(mktemp -d)"
+chmod 0777 "${workdir}"
 mkdir -p "${workdir}/server"
+chmod 0777 "${workdir}/server"
 : > "${workdir}/Assets.zip"
 : > "${workdir}/server/HytaleServer.jar"
 set +e
