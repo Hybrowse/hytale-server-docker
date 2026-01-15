@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hytale-server
+  namespace: hytale
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: hytale-server
+  template:
+    metadata:
+      labels:
+        app: hytale-server
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+        - name: hytale-server
+          image: hybrowse/hytale-server:latest
+          stdin: true
+          tty: true
+          ports:
+            - name: quic
+              containerPort: 5520
+              protocol: UDP
+          env:
+            - name: HYTALE_AUTO_DOWNLOAD
+              value: "true"
+            - name: HYTALE_BIND
+              value: "0.0.0.0:5520"
+            - name: HYTALE_AUTH_MODE
+              value: "authenticated"
+            - name: JVM_XMS
+              value: "2G"
+            - name: JVM_XMX
+              value: "4G"
+          resources:
+            requests:
+              memory: "4Gi"
+              cpu: "2000m"
+            limits:
+              memory: "8Gi"
+              cpu: "4000m"
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - pgrep -f 'java.*HytaleServer.jar' > /dev/null
+            initialDelaySeconds: 300
+            periodSeconds: 60
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - pgrep -f 'java.*HytaleServer.jar' > /dev/null
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: hytale-server-data
+      restartPolicy: Always
