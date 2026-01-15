@@ -1,0 +1,16 @@
+apiVersion: v2
+name: hytale-server
+description: A Helm chart for deploying Hytale dedicated server on Kubernetes
+type: application
+version: 0.1.0
+appVersion: "latest"
+keywords:
+  - hytale
+  - game-server
+  - minecraft
+home: https://github.com/hybrowse/hytale-server-docker
+sources:
+  - https://github.com/hybrowse/hytale-server-docker
+maintainers:
+  - name: Hybrowse
+    url: https://hybrowse.gg
