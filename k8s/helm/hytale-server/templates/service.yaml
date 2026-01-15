@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "hytale-server.fullname" . }}
+  labels:
+    {{- include "hytale-server.labels" . | nindent 4 }}
+  {{- with .Values.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.type }}
+  {{- if .Values.service.loadBalancerIP }}
+  loadBalancerIP: {{ .Values.service.loadBalancerIP }}
+  {{- end }}
+  {{- if .Values.service.externalTrafficPolicy }}
+  externalTrafficPolicy: {{ .Values.service.externalTrafficPolicy }}
+  {{- end }}
+  ports:
+  - port: {{ .Values.service.port }}
+    targetPort: quic
+    protocol: {{ .Values.service.protocol }}
+    name: quic
+  selector:
+    {{- include "hytale-server.selectorLabels" . | nindent 4 }}

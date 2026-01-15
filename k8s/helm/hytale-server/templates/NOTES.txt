@@ -1,0 +1,31 @@
+1. Get the application URL by running these commands:
+{{- if contains "NodePort" .Values.service.type }}
+  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "hytale-server.fullname" . }})
+  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo "Hytale server available at: udp://$NODE_IP:$NODE_PORT"
+{{- else if contains "LoadBalancer" .Values.service.type }}
+  NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+        You can watch the status by running: kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "hytale-server.fullname" . }}
+  
+  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "hytale-server.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+  echo "Hytale server available at: udp://$SERVICE_IP:{{ .Values.service.port }}"
+{{- else if contains "ClusterIP" .Values.service.type }}
+  kubectl port-forward --namespace {{ .Release.Namespace }} svc/{{ include "hytale-server.fullname" . }} 5520:5520/udp
+  echo "Hytale server available at: udp://127.0.0.1:5520"
+{{- end }}
+
+2. Authenticate the server (required for player connections):
+
+   Attach to the server console:
+   kubectl attach --namespace {{ .Release.Namespace }} -it deployment/{{ include "hytale-server.fullname" . }}
+
+   Then run in the server console:
+   /auth persistence Encrypted
+   /auth login device
+
+   Follow the URL and device code shown.
+
+   Detach from console: Ctrl-p then Ctrl-q
+
+3. View server logs:
+   kubectl logs --namespace {{ .Release.Namespace }} -f deployment/{{ include "hytale-server.fullname" . }}

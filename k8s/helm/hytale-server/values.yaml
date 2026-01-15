@@ -1,0 +1,166 @@
+replicaCount: 1
+
+image:
+  repository: hybrowse/hytale-server
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: false
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext:
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+  runAsNonRoot: true
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: LoadBalancer
+  port: 5520
+  protocol: UDP
+  annotations: {}
+  loadBalancerIP: ""
+  externalTrafficPolicy: Local
+
+resources:
+  requests:
+    memory: "4Gi"
+    cpu: "2000m"
+  limits:
+    memory: "8Gi"
+    cpu: "4000m"
+
+persistence:
+  enabled: true
+  # existingClaim: ""
+  storageClass: ""
+  accessMode: ReadWriteOnce
+  size: 20Gi
+  annotations: {}
+
+# Hytale server configuration
+hytale:
+  # Auto-download server files using the official downloader
+  autoDownload: true
+  autoUpdate: true
+
+  # Authentication mode: authenticated or offline
+  authMode: authenticated
+
+  bind: "0.0.0.0:5520"
+
+  # Disable Sentry error reporting (recommended for plugin development)
+  disableSentry: false
+
+  # Accept early plugins (acknowledges unsupported plugins)
+  acceptEarlyPlugins: false
+
+  backup:
+    enabled: false
+    dir: ""
+    frequencyMinutes: 30
+    maxCount: 5
+
+  allowOp: true
+  bare: false
+  bootCommand: ""
+  disableAssetCompare: false
+  disableCpbBuild: false
+  disableFileWatcher: false
+  eventDebug: false
+  forceNetworkFlush: true
+  generateSchema: false
+  singleplayer: false
+  validateAssets: false
+  validateWorldGen: false
+
+  earlyPluginsPath: ""
+  modsPath: ""
+  prefabCachePath: ""
+  universePath: ""
+  worldGenPath: ""
+
+  ownerName: ""
+  ownerUUID: ""
+
+  sessionToken: ""
+  identityToken: ""
+
+  downloader:
+    patchline: ""
+    skipUpdateCheck: false
+    keepGameZip: false
+
+jvm:
+  xms: "2G"
+  xmx: "4G"
+  extraArgs: ""
+
+aot:
+  enabled: auto # auto|true|false|generate
+
+curseforge:
+  enabled: false
+  apiKey: ""
+  # Use secret for API key in production
+  apiKeySecret:
+    name: ""
+    key: "curseforge-api-key"
+  mods: []
+  # Example:
+  # - "advanced-item-info"
+  # - "project-id:12345"
+  # - "slug:my-mod@1.0.0"
+  autoUpdate: true
+  releaseChannel: release # release|beta|alpha|any
+  gameVersionFilter: ""
+  checkIntervalSeconds: 0
+  prune: false
+  failOnError: false
+
+extraEnv: []
+# - name: CUSTOM_VAR
+#   value: "custom-value"
+
+extraEnvFrom: []
+# - secretRef:
+#     name: my-secret
+# - configMapRef:
+#     name: my-configmap
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# Probes configuration
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 300
+  periodSeconds: 60
+  timeoutSeconds: 10
+  failureThreshold: 3
+
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 60
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3

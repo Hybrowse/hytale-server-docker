@@ -1,0 +1,270 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "hytale-server.fullname" . }}
+  labels:
+    {{- include "hytale-server.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "hytale-server.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "hytale-server.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.serviceAccount.create }}
+      serviceAccountName: {{ include "hytale-server.serviceAccountName" . }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+      - name: {{ .Chart.Name }}
+        securityContext:
+          {{- toYaml .Values.securityContext | nindent 12 }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        stdin: true
+        tty: true
+        ports:
+        - name: quic
+          containerPort: 5520
+          protocol: UDP
+        env:
+        - name: HYTALE_AUTO_DOWNLOAD
+          value: {{ .Values.hytale.autoDownload | quote }}
+        - name: HYTALE_AUTO_UPDATE
+          value: {{ .Values.hytale.autoUpdate | quote }}
+        - name: HYTALE_BIND
+          value: {{ .Values.hytale.bind | quote }}
+        - name: HYTALE_AUTH_MODE
+          value: {{ .Values.hytale.authMode | quote }}
+        - name: HYTALE_DISABLE_SENTRY
+          value: {{ .Values.hytale.disableSentry | quote }}
+        - name: HYTALE_ACCEPT_EARLY_PLUGINS
+          value: {{ .Values.hytale.acceptEarlyPlugins | quote }}
+        - name: HYTALE_ENABLE_BACKUP
+          value: {{ .Values.hytale.backup.enabled | quote }}
+        {{- if .Values.hytale.backup.enabled }}
+        - name: HYTALE_BACKUP_FREQUENCY_MINUTES
+          value: {{ .Values.hytale.backup.frequencyMinutes | quote }}
+        - name: HYTALE_BACKUP_MAX_COUNT
+          value: {{ .Values.hytale.backup.maxCount | quote }}
+        {{- if .Values.hytale.backup.dir }}
+        - name: HYTALE_BACKUP_DIR
+          value: {{ .Values.hytale.backup.dir | quote }}
+        {{- end }}
+        {{- end }}
+        - name: JVM_XMS
+          value: {{ .Values.jvm.xms | quote }}
+        - name: JVM_XMX
+          value: {{ .Values.jvm.xmx | quote }}
+        {{- if .Values.jvm.extraArgs }}
+        - name: JVM_EXTRA_ARGS
+          value: {{ .Values.jvm.extraArgs | quote }}
+        {{- end }}
+        - name: ENABLE_AOT
+          value: {{ .Values.aot.enabled | quote }}
+        {{- if .Values.hytale.allowOp }}
+        - name: HYTALE_ALLOW_OP
+          value: "true"
+        {{- end }}
+        {{- if .Values.hytale.bare }}
+        - name: HYTALE_BARE
+          value: "true"
+        {{- end }}
+        {{- if .Values.hytale.bootCommand }}
+        - name: HYTALE_BOOT_COMMAND
+          value: {{ .Values.hytale.bootCommand | quote }}
+        {{- end }}
+        {{- if .Values.hytale.disableAssetCompare }}
+        - name: HYTALE_DISABLE_ASSET_COMPARE
+          value: "true"
+        {{- end }}
+        {{- if .Values.hytale.disableCpbBuild }}
+        - name: HYTALE_DISABLE_CPB_BUILD
+          value: "true"
+        {{- end }}
+        {{- if .Values.hytale.disableFileWatcher }}
+        - name: HYTALE_DISABLE_FILE_WATCHER
+          value: "true"
+        {{- end }}
+        {{- if .Values.hytale.earlyPluginsPath }}
+        - name: HYTALE_EARLY_PLUGINS_PATH
+          value: {{ .Values.hytale.earlyPluginsPath | quote }}
+        {{- end }}
+        {{- if .Values.hytale.eventDebug }}
+        - name: HYTALE_EVENT_DEBUG
+          value: "true"
+        {{- end }}
+        {{- if .Values.hytale.forceNetworkFlush }}
+        - name: HYTALE_FORCE_NETWORK_FLUSH
+          value: "true"
+        {{- end }}
+        {{- if .Values.hytale.generateSchema }}
+        - name: HYTALE_GENERATE_SCHEMA
+          value: "true"
+        {{- end }}
+        {{- if .Values.hytale.modsPath }}
+        - name: HYTALE_MODS_PATH
+          value: {{ .Values.hytale.modsPath | quote }}
+        {{- end }}
+        {{- if .Values.hytale.ownerName }}
+        - name: HYTALE_OWNER_NAME
+          value: {{ .Values.hytale.ownerName | quote }}
+        {{- end }}
+        {{- if .Values.hytale.ownerUUID }}
+        - name: HYTALE_OWNER_UUID
+          value: {{ .Values.hytale.ownerUUID | quote }}
+        {{- end }}
+        {{- if .Values.hytale.prefabCachePath }}
+        - name: HYTALE_PREFAB_CACHE_PATH
+          value: {{ .Values.hytale.prefabCachePath | quote }}
+        {{- end }}
+        {{- if .Values.hytale.singleplayer }}
+        - name: HYTALE_SINGLEPLAYER
+          value: "true"
+        {{- end }}
+        {{- if .Values.hytale.universePath }}
+        - name: HYTALE_UNIVERSE_PATH
+          value: {{ .Values.hytale.universePath | quote }}
+        {{- end }}
+        {{- if .Values.hytale.validateAssets }}
+        - name: HYTALE_VALIDATE_ASSETS
+          value: "true"
+        {{- end }}
+        {{- if .Values.hytale.validateWorldGen }}
+        - name: HYTALE_VALIDATE_WORLD_GEN
+          value: "true"
+        {{- end }}
+        {{- if .Values.hytale.worldGenPath }}
+        - name: HYTALE_WORLD_GEN_PATH
+          value: {{ .Values.hytale.worldGenPath | quote }}
+        {{- end }}
+        {{- if .Values.hytale.sessionToken }}
+        - name: HYTALE_SERVER_SESSION_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "hytale-server.fullname" . }}-secrets
+              key: session-token
+        {{- end }}
+        {{- if .Values.hytale.identityToken }}
+        - name: HYTALE_SERVER_IDENTITY_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "hytale-server.fullname" . }}-secrets
+              key: identity-token
+        {{- end }}
+        {{- if .Values.hytale.downloader.patchline }}
+        - name: HYTALE_DOWNLOADER_PATCHLINE
+          value: {{ .Values.hytale.downloader.patchline | quote }}
+        {{- end }}
+        {{- if .Values.hytale.downloader.skipUpdateCheck }}
+        - name: HYTALE_DOWNLOADER_SKIP_UPDATE_CHECK
+          value: "true"
+        {{- end }}
+        {{- if .Values.hytale.downloader.keepGameZip }}
+        - name: HYTALE_KEEP_GAME_ZIP
+          value: "true"
+        {{- end }}
+        {{- if .Values.curseforge.enabled }}
+        - name: HYTALE_CURSEFORGE_MODS
+          value: {{ join " " .Values.curseforge.mods | quote }}
+        {{- if .Values.curseforge.apiKeySecret.name }}
+        - name: HYTALE_CURSEFORGE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.curseforge.apiKeySecret.name }}
+              key: {{ .Values.curseforge.apiKeySecret.key }}
+        {{- else if .Values.curseforge.apiKey }}
+        - name: HYTALE_CURSEFORGE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "hytale-server.fullname" . }}-secrets
+              key: curseforge-api-key
+        {{- end }}
+        - name: HYTALE_CURSEFORGE_AUTO_UPDATE
+          value: {{ .Values.curseforge.autoUpdate | quote }}
+        - name: HYTALE_CURSEFORGE_RELEASE_CHANNEL
+          value: {{ .Values.curseforge.releaseChannel | quote }}
+        {{- if .Values.curseforge.gameVersionFilter }}
+        - name: HYTALE_CURSEFORGE_GAME_VERSION_FILTER
+          value: {{ .Values.curseforge.gameVersionFilter | quote }}
+        {{- end }}
+        {{- if .Values.curseforge.checkIntervalSeconds }}
+        - name: HYTALE_CURSEFORGE_CHECK_INTERVAL_SECONDS
+          value: {{ .Values.curseforge.checkIntervalSeconds | quote }}
+        {{- end }}
+        - name: HYTALE_CURSEFORGE_PRUNE
+          value: {{ .Values.curseforge.prune | quote }}
+        - name: HYTALE_CURSEFORGE_FAIL_ON_ERROR
+          value: {{ .Values.curseforge.failOnError | quote }}
+        {{- end }}
+        {{- with .Values.extraEnv }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with .Values.extraEnvFrom }}
+        envFrom:
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        resources:
+          {{- toYaml .Values.resources | nindent 12 }}
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        {{- if .Values.livenessProbe.enabled }}
+        livenessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - pgrep -f 'java.*HytaleServer.jar' > /dev/null
+          initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+        {{- end }}
+        {{- if .Values.readinessProbe.enabled }}
+        readinessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - pgrep -f 'java.*HytaleServer.jar' > /dev/null
+          initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+        {{- end }}
+      volumes:
+      - name: data
+        {{- if .Values.persistence.enabled }}
+        persistentVolumeClaim:
+          claimName: {{ .Values.persistence.existingClaim | default (include "hytale-server.fullname" .) }}
+        {{- else }}
+        emptyDir: {}
+        {{- end }}
+      restartPolicy: Always
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

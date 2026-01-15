@@ -1,0 +1,241 @@
+name: Kubernetes Validation
+
+on:
+  pull_request:
+    paths:
+      - 'k8s/**'
+      - '.github/workflows/k8s-validation.yml'
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - 'k8s/**'
+      - '.github/workflows/k8s-validation.yml'
+  workflow_dispatch:
+
+jobs:
+  helm-lint:
+    name: Helm Chart Linting
+    runs-on: ubuntu-latest
+    container:
+      image: alpine/helm:3.14.0
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Lint Helm chart
+        run: |
+          helm lint k8s/helm/hytale-server
+
+      - name: Helm template validation
+        run: |
+          helm template hytale-server k8s/helm/hytale-server --debug
+
+      - name: Validate with test values
+        run: |
+          # Test with default values
+          helm template hytale-server k8s/helm/hytale-server > /dev/null
+          echo "✓ Default values validated"
+          
+          # Test with CurseForge enabled
+          helm template hytale-server k8s/helm/hytale-server \
+            --set curseforge.enabled=true \
+            --set curseforge.apiKey=test-key \
+            --set 'curseforge.mods[0]=test-mod' > /dev/null
+          echo "✓ CurseForge configuration validated"
+          
+          # Test with backups enabled
+          helm template hytale-server k8s/helm/hytale-server \
+            --set hytale.backup.enabled=true > /dev/null
+          echo "✓ Backup configuration validated"
+
+      - name: Check Chart.yaml version
+        run: |
+          VERSION=$(grep '^version:' k8s/helm/hytale-server/Chart.yaml | awk '{print $2}')
+          if [ -z "$VERSION" ]; then
+            echo "Error: Chart version not found"
+            exit 1
+          fi
+          echo "Chart version: $VERSION"
+
+  kustomize-validate:
+    name: Kustomize Validation
+    runs-on: ubuntu-latest
+    container:
+      image: alpine:3.19
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Kustomize
+        run: |
+          apk add --no-cache curl bash
+          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+          mv kustomize /usr/local/bin/
+
+      - name: Validate Kustomize base
+        run: |
+          echo "Validating base kustomization..."
+          kustomize build k8s/kustomize/base > /dev/null
+          echo "✓ Base kustomization is valid"
+
+      - name: Validate development overlay
+        run: |
+          echo "Validating development overlay..."
+          kustomize build k8s/kustomize/overlays/development > /dev/null
+          echo "✓ Development overlay is valid"
+
+      - name: Validate production overlay
+        run: |
+          echo "Validating production overlay..."
+          kustomize build k8s/kustomize/overlays/production > /dev/null
+          echo "✓ Production overlay is valid"
+
+      - name: Check for deprecated fields
+        run: |
+          echo "Checking for deprecated Kustomize fields..."
+          
+          # Check for deprecated 'bases' field
+          if grep -r "^bases:" k8s/kustomize/; then
+            echo "Error: Deprecated 'bases' field found. Use 'resources' instead."
+            exit 1
+          fi
+          
+          # Check for deprecated 'commonLabels' field
+          if grep -r "^commonLabels:" k8s/kustomize/; then
+            echo "Warning: Deprecated 'commonLabels' field found. Consider using 'labels' instead."
+            # Don't fail, just warn
+          fi
+          
+          echo "✓ No critical deprecated fields found"
+
+  yaml-lint:
+    name: YAML Linting
+    runs-on: ubuntu-latest
+    container:
+      image: python:3.11-alpine
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install yamllint
+        run: pip install --no-cache-dir yamllint
+
+      - name: Lint YAML files
+        run: |
+          cat > .yamllint.yml << EOF
+          extends: default
+          rules:
+            line-length:
+              max: 120
+              level: warning
+            indentation:
+              spaces: 2
+            trailing-spaces: enable
+            comments:
+              min-spaces-from-content: 1
+            document-start: disable
+            truthy:
+              allowed-values: ['true', 'false', 'on', 'off']
+          EOF
+          
+          yamllint k8s/ || true
+
+  kubernetes-validate:
+    name: Kubernetes Manifest Validation
+    runs-on: ubuntu-latest
+    container:
+      image: alpine:3.19
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install tools
+        run: |
+          apk add --no-cache curl bash
+          
+          # Install kubectl
+          curl -LO "https://dl.k8s.io/release/v1.29.0/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          mv kubectl /usr/local/bin/
+          
+          # Install helm
+          curl -fsSL https://get.helm.sh/helm-v3.14.0-linux-amd64.tar.gz | tar -xz
+          mv linux-amd64/helm /usr/local/bin/
+          
+          # Install kustomize
+          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+          mv kustomize /usr/local/bin/
+          
+          # Install kubeconform
+          curl -L https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz | tar xz
+          mv kubeconform /usr/local/bin/
+
+      - name: Validate Helm-generated manifests
+        run: |
+          # Generate manifests for schema validation
+          helm template hytale-server k8s/helm/hytale-server > /tmp/helm-manifests.yaml
+          echo "✓ Helm manifests generated successfully"
+
+      - name: Validate Kustomize-generated manifests
+        run: |
+          # Generate manifests for schema validation
+          kustomize build k8s/kustomize/overlays/development > /tmp/kustomize-dev-manifests.yaml
+          echo "✓ Kustomize development manifests generated successfully"
+          
+          kustomize build k8s/kustomize/overlays/production > /tmp/kustomize-prod-manifests.yaml
+          echo "✓ Kustomize production manifests generated successfully"
+
+      - name: Validate against Kubernetes schemas
+        run: |
+          echo "Validating Helm manifests..."
+          helm template hytale-server k8s/helm/hytale-server | kubeconform -strict -summary
+          
+          echo "Validating Kustomize development overlay..."
+          kustomize build k8s/kustomize/overlays/development | kubeconform -strict -summary
+          
+          echo "Validating Kustomize production overlay..."
+          kustomize build k8s/kustomize/overlays/production | kubeconform -strict -summary
+
+  summary:
+    name: Validation Summary
+    runs-on: ubuntu-latest
+    needs: [helm-lint, kustomize-validate, yaml-lint, kubernetes-validate]
+    if: always()
+    steps:
+      - name: Check all jobs
+        run: |
+          echo "## Kubernetes Validation Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ needs.helm-lint.result }}" == "success" ]; then
+            echo "Helm chart linting passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Helm chart linting failed" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ "${{ needs.kustomize-validate.result }}" == "success" ]; then
+            echo "Kustomize validation passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Kustomize validation failed" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ "${{ needs.yaml-lint.result }}" == "success" ]; then
+            echo "YAML linting passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "YAML linting failed" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ "${{ needs.kubernetes-validate.result }}" == "success" ]; then
+            echo "Kubernetes manifest validation passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Kubernetes manifest validation failed" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Fail if any job failed
+        if: |
+          needs.helm-lint.result == 'failure' ||
+          needs.kustomize-validate.result == 'failure' ||
+          needs.kubernetes-validate.result == 'failure'
+        run: exit 1

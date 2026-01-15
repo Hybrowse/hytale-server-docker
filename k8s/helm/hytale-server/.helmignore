@@ -1,0 +1,31 @@
+# .helmignore patterns
+# Ignore files that shouldn't be included in the Helm chart package
+
+# Version control
+.git/
+.gitignore
+.gitattributes
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Documentation
+README.md
+NOTES.txt
+
+# Development files
+*.swp
+*.bak
+*.tmp
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.idea/
+.vscode/
+*.iml

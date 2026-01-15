@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hytale-server
+spec:
+  template:
+    spec:
+      containers:
+        - name: hytale-server
+          resources:
+            requests:
+              memory: "8Gi"
+              cpu: "4000m"
+            limits:
+              memory: "16Gi"
+              cpu: "8000m"
+          env:
+            - name: HYTALE_ENABLE_BACKUP
+              value: "true"
+            - name: HYTALE_BACKUP_FREQUENCY_MINUTES
+              value: "60"
+            - name: HYTALE_BACKUP_MAX_COUNT
+              value: "10"
+            - name: HYTALE_AUTO_UPDATE
+              value: "true"
+            - name: JVM_XMS
+              value: "4G"
+            - name: JVM_XMX
+              value: "8G"
