@@ -1,0 +1,27 @@
+apiVersion: v1
+entries:
+  hytale-server:
+  - apiVersion: v2
+    appVersion: 0.3.0
+    created: "2026-01-18T18:21:51.813320599Z"
+    description: Production-ready Docker image for Hytale servers featuring automatic
+      CurseForge mod management, auto-download with smart update detection, easy configuration,
+      built-in backup support, and quick troubleshooting.
+    digest: 0de16038a866f432011bf5d27d9f136028b76aba92ea7eab40f77570228b63e2
+    home: https://hybrowse.gg/docker-image
+    keywords:
+    - hytale
+    - hytale-server
+    - game-server
+    - dedicated-server
+    maintainers:
+    - name: Hybrowse
+      url: https://hybrowse.gg
+    name: hytale-server
+    sources:
+    - https://github.com/Hybrowse/hytale-server-docker
+    type: application
+    urls:
+    - https://hybrowse.github.io/hytale-server-docker/hytale-server-0.3.0.tgz
+    version: 0.3.0
+generated: "2026-01-18T18:21:51.812586224Z"
