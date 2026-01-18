@@ -7,5 +7,6 @@ resources:
   - service-headless.yaml
   - statefulset.yaml
 
-commonLabels:
-  app.kubernetes.io/name: hytale-server
+labels:
+  - pairs:
+      app.kubernetes.io/name: hytale-server
