@@ -110,6 +110,119 @@ helm install hytale hybrowse/hytale-server \
   --set service.nodePort=30520
 ```
 
+### Example: values.yaml snippet (persistence and environment variables)
+
+If you prefer a values file over long `--set` commands, this is a minimal starting point.
+
+```yaml
+workload:
+  kind: StatefulSet
+
+persistence:
+  enabled: true
+  size: 5Gi
+
+env:
+  HYTALE_AUTO_DOWNLOAD: "true"
+  HYTALE_AUTO_UPDATE: "true"
+```
+
+### Example: wiring secrets (server auth, CurseForge, downloader credentials)
+
+The chart supports referencing existing Kubernetes `Secret` objects via `.Values.secrets.*`.
+This avoids putting secrets into Helm values files.
+
+Example secrets (create once per environment):
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: hytale-server-auth
+type: Opaque
+stringData:
+  sessionToken: "<redacted>"
+  identityToken: "<redacted>"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: hytale-curseforge
+type: Opaque
+stringData:
+  apiKey: "<redacted>"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: hytale-downloader-credentials
+type: Opaque
+stringData:
+  credentials.json: "{...}" 
+```
+
+Then reference them from Helm values:
+
+```yaml
+secrets:
+  serverAuth:
+    name: hytale-server-auth
+    sessionTokenKey: sessionToken
+    identityTokenKey: identityToken
+
+  curseforge:
+    name: hytale-curseforge
+    apiKeyKey: apiKey
+
+  downloaderCredentials:
+    name: hytale-downloader-credentials
+    credentialsKey: credentials.json
+```
+
+Notes:
+
+- The chart maps server auth secrets to `HYTALE_SERVER_SESSION_TOKEN` / `HYTALE_SERVER_IDENTITY_TOKEN`.
+- The chart mounts the CurseForge key and downloader credentials as files and sets `HYTALE_CURSEFORGE_API_KEY_SRC` / `HYTALE_DOWNLOADER_CREDENTIALS_SRC`.
+
+### Production pattern: multi-environment and multi-region
+
+For multi-region deployments, treat each region as a separate Helm release.
+Keep configuration and secrets isolated per environment and per region.
+
+- **[namespaces]**
+  - Use a namespace per environment (for example `hytale-dev`, `hytale-staging`, `hytale-prod`).
+  - If you run multiple regions, add a region suffix (for example `hytale-prod-eu`, `hytale-prod-us`).
+
+- **[values files]**
+  - Store non-secret configuration in environment-specific values files, for example:
+    - `values.dev.yaml`
+    - `values.staging.yaml`
+    - `values.prod.yaml`
+  - Add region overrides where needed, for example:
+    - `values.prod-eu.yaml`
+    - `values.prod-us.yaml`
+
+- **[secrets management]**
+  - Prefer an external secret manager (or GitOps secrets tooling) and materialize Kubernetes `Secret` objects into each namespace.
+  - Keep secret names consistent across environments to simplify Helm values.
+  - Rotate secrets by updating the Secret object and restarting Pods (Kubernetes env vars do not update in-place).
+
+- **[rbac / least privilege]**
+  - Keep `serviceAccount.automount=false` unless you explicitly need Kubernetes API access.
+  - If you use external secret tooling, grant it access only to the specific namespaces.
+
+- **[release naming]**
+  - Use explicit release names per region, for example:
+    - `hytale-eu`
+    - `hytale-us`
+
+Example install commands:
+
+```bash
+helm install hytale-eu hybrowse/hytale-server -n hytale-prod-eu -f values.prod.yaml -f values.prod-eu.yaml
+helm install hytale-us hybrowse/hytale-server -n hytale-prod-us -f values.prod.yaml -f values.prod-us.yaml
+```
+
 ## Kustomize
 
 Kustomize manifests live in `deploy/kustomize`.
