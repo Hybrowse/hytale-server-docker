@@ -89,6 +89,12 @@ See: [`troubleshooting.md`](troubleshooting.md)
 
 Players can now connect.
 
+## Automation (optional)
+
+If you want to run server console commands from scripts (for example before planned restarts), this image includes `hytale-cli`.
+
+See: [`configuration.md`](configuration.md#send-console-commands-hytale-cli)
+
 ## Next steps
 
 - [`configuration.md`](configuration.md) — environment variables, JVM tuning, backups

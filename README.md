@@ -49,6 +49,14 @@ Full guide: [`docs/image/quickstart.md`](docs/image/quickstart.md)
 
 Troubleshooting: [`docs/image/troubleshooting.md`](docs/image/troubleshooting.md)
 
+Automation: you can send server console commands from scripts via `hytale-cli`:
+
+```bash
+docker exec hytale hytale-cli send "/say Server is running!"
+```
+
+See: [`docs/image/configuration.md`](docs/image/configuration.md#send-console-commands-hytale-cli)
+
 ## Documentation
 
 - [`docs/image/quickstart.md`](docs/image/quickstart.md) — start here
@@ -74,10 +82,7 @@ This image uses **Adoptium / Eclipse Temurin 25**.
 
 See [`ROADMAP.md`](ROADMAP.md) for details. Highlights:
 
-- **MVP**: non-root runtime, startup validation, minimal healthcheck, clear docs
-- **Operations**: safer upgrades, backup guidance, better logging ergonomics
-- **Observability**: metrics hooks / exporter guidance
-- **Provider-grade**: non-interactive auth flows and fleet patterns
+- **Planned next**: graceful shutdown guidance, basic healthcheck (with a way to disable), diagnostics helpers, observability guidance, provider-grade patterns
  
 ## Documentation
  

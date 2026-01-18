@@ -83,6 +83,8 @@ HYTALE_WORLD_GEN_PATH="${HYTALE_WORLD_GEN_PATH:-}"
 HYTALE_AUTO_DOWNLOAD="${HYTALE_AUTO_DOWNLOAD:-false}"
 HYTALE_AUTO_UPDATE="${HYTALE_AUTO_UPDATE:-true}"
 
+HYTALE_CONSOLE_PIPE="${HYTALE_CONSOLE_PIPE:-true}"
+
 HYTALE_CURSEFORGE_MODS="${HYTALE_CURSEFORGE_MODS:-}"
 
 ENABLE_AOT="${ENABLE_AOT:-auto}"
@@ -441,6 +443,25 @@ fi
 
 if [ -n "${HYTALE_SERVER_IDENTITY_TOKEN:-}" ]; then
   set -- "$@" --identity-token "${HYTALE_SERVER_IDENTITY_TOKEN}"
+fi
+
+if is_true "${HYTALE_CONSOLE_PIPE}"; then
+  CONSOLE_FIFO="${HYTALE_CONSOLE_FIFO:-/tmp/hytale-console.fifo}"
+
+  if [ -e "${CONSOLE_FIFO}" ] && [ ! -p "${CONSOLE_FIFO}" ]; then
+    rm -f "${CONSOLE_FIFO}" 2>/dev/null || true
+  fi
+
+  if [ ! -p "${CONSOLE_FIFO}" ]; then
+    rm -f "${CONSOLE_FIFO}" 2>/dev/null || true
+    mkfifo "${CONSOLE_FIFO}"
+    chown hytale "${CONSOLE_FIFO}" 2>/dev/null || true
+    chmod 0600 "${CONSOLE_FIFO}" 2>/dev/null || true
+  fi
+
+  exec 3<> "${CONSOLE_FIFO}"
+  cd "${SERVER_DIR}"
+  exec "$@" <&3
 fi
 
 cd "${SERVER_DIR}"

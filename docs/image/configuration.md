@@ -77,6 +77,8 @@ See: [`curseforge-mods.md`](curseforge-mods.md)
 | `HYTALE_SERVER_IDENTITY_TOKEN` | *(empty)* | Passed as `--identity-token` (**secret**). |
 | `HYTALE_AUTO_DOWNLOAD` | `false` | If `true`, downloads server files and `Assets.zip` via the official Hytale Downloader when missing. |
 | `HYTALE_AUTO_UPDATE` | `true` | If `true`, checks for updates on each start (compares remote version vs local). Only downloads when an update is available. |
+| `HYTALE_CONSOLE_PIPE` | `true` | If `true`, enables the console command pipe used by `hytale-cli`. If `false`, the server uses normal stdin and `hytale-cli` is disabled. |
+| `HYTALE_CONSOLE_FIFO` | `/tmp/hytale-console.fifo` | Path to the console FIFO inside the container (only used when `HYTALE_CONSOLE_PIPE=true`). |
 | `HYTALE_VERSION_FILE` | `/data/.hytale-version` | File where the installed server version is stored (used for update checks). |
 | `HYTALE_DOWNLOADER_URL` | `https://downloader.hytale.com/hytale-downloader.zip` | Official downloader URL (must start with `https://downloader.hytale.com/`). |
 | `HYTALE_DOWNLOADER_DIR` | `/data/.hytale-downloader` | Directory where the image stores the downloader binary. |
@@ -153,6 +155,26 @@ services:
     environment:
       HYTALE_DISABLE_SENTRY: "true"
 ```
+
+### Send console commands (hytale-cli)
+
+This image includes a small helper called `hytale-cli` that can be used to send commands to the server console from a script (for example before a planned restart).
+
+If you want to disable this feature, set `HYTALE_CONSOLE_PIPE=false`.
+
+From your host:
+
+```bash
+docker exec hytale hytale-cli send "/auth status"
+```
+
+Multiple commands (one per line):
+
+```bash
+printf '%s\n' "/auth status" "/auth persistence Encrypted" | docker exec -i hytale hytale-cli send
+```
+
+Advanced: the console FIFO path inside the container can be overridden via `HYTALE_CONSOLE_FIFO`.
 
 ### Accept early plugins (unsupported)
 

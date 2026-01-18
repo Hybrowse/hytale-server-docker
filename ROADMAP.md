@@ -32,7 +32,6 @@ This roadmap focuses on delivering a **secure, fast, and easy-to-operate** Docke
  
 ## Next (operator UX & reliability)
 
-- Upgrade guidance that reflects strict client/server protocol matching
 - Config file interpolation via environment variables (e.g. `CFG_*`), to generate/update config files at startup
 - Troubleshooting commands and diagnostics output (versions, config paths, bind info)
 - Configurable UID/GID for file permission alignment
