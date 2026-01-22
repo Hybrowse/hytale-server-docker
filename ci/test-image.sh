@@ -72,7 +72,10 @@ out="$(docker run --rm \
 status=$?
 set -e
 [ ${status} -ne 0 ] || fail "expected non-zero exit status when mods download URL scheme is unsupported"
-count="$(printf '%s' "${out}" | grep -c "mods download: unsupported URL scheme" 2>/dev/null || echo 0)"
+echo "${out}" | grep -qF "ftp://example.com/mod-a.zip" || fail "expected mod-a URL to appear in output"
+echo "${out}" | grep -qF "ftp://example.com/mod-b.zip" || fail "expected mod-b URL to appear in output"
+echo "${out}" | grep -qF "ftp://example.com/mod-c.zip" || fail "expected mod-c URL to appear in output"
+count="$(printf '%s' "${out}" | grep -cF "unsupported URL scheme" 2>/dev/null || true)"
 [ "${count}" -eq 3 ] || fail "expected 3 unsupported scheme errors (comma + newline parsing), got ${count}"
 pass "pre-start downloads fail fast on unsupported URL schemes"
 
@@ -302,6 +305,28 @@ fi
 [ -f "${workdir8}/.machine-id" ] || fail "expected .machine-id to be created on /data"
 pass "read-only root filesystem does not cause machine-id error output"
 rm -rf "${workdir8}"
+
+mods_multiline="$(printf '%s\n' \
+  '1409700 # Serilum Hybrid' \
+  '1423805 # Serilum WelcomeMessage' \
+  '1405415 # SimpleClaims' \
+  '1409811 # AdvancedItemInfo')"
+out="$(docker run --rm \
+  --entrypoint /usr/local/bin/hytale-curseforge-mods \
+  -e HYTALE_CURSEFORGE_EXPAND_REFS_ONLY=true \
+  -e "HYTALE_CURSEFORGE_MODS=${mods_multiline}" \
+  "${IMAGE_NAME}" 2>&1)"
+echo "${out}" | grep -qx "1409700" || fail "expected multiline mods parsing to include 1409700"
+echo "${out}" | grep -qx "1423805" || fail "expected multiline mods parsing to include 1423805"
+echo "${out}" | grep -qx "1405415" || fail "expected multiline mods parsing to include 1405415"
+echo "${out}" | grep -qx "1409811" || fail "expected multiline mods parsing to include 1409811"
+if echo "${out}" | grep -q "#"; then
+  fail "expected inline comments to be stripped from mod refs"
+fi
+if echo "${out}" | grep -qi "serilum"; then
+  fail "expected comment text to be stripped from mod refs"
+fi
+pass "multiline HYTALE_CURSEFORGE_MODS supports inline comments"
 
 rm -rf "${workdir}"
 pass "all tests"

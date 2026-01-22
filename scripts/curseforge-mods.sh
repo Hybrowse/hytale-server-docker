@@ -22,6 +22,42 @@ trim() {
   printf '%s' "${s}"
 }
 
+expand_refs() {
+  input="$1"
+  printf '%s\n' "${input}" | while IFS= read -r raw_line || [ -n "${raw_line}" ]; do
+    raw_line="$(printf '%s' "${raw_line}" | sed 's/#.*$//')"
+    raw_line="$(trim "${raw_line}")"
+    if [ -z "${raw_line}" ]; then
+      continue
+    fi
+
+    for token in ${raw_line}; do
+      case "${token}" in
+        @*)
+          path="${token#@}"
+          if [ -f "${path}" ]; then
+            while IFS= read -r line || [ -n "${line}" ]; do
+              line="$(printf '%s' "${line}" | sed 's/#.*$//')"
+              line="$(trim "${line}")"
+              if [ -z "${line}" ]; then
+                continue
+              fi
+              for t in ${line}; do
+                printf '%s\n' "${t}"
+              done
+            done <"${path}"
+          else
+            log "WARNING: listing file not found: ${path}"
+          fi
+          ;;
+        *)
+          printf '%s\n' "${token}"
+          ;;
+      esac
+    done
+  done
+}
+
 DATA_DIR="${DATA_DIR:-/data}"
 CF_API_BASE="https://api.curseforge.com"
 
@@ -37,6 +73,12 @@ HYTALE_CURSEFORGE_CHECK_INTERVAL_SECONDS="${HYTALE_CURSEFORGE_CHECK_INTERVAL_SEC
 HYTALE_CURSEFORGE_GAME_VERSION_FILTER="${HYTALE_CURSEFORGE_GAME_VERSION_FILTER:-}"
 HYTALE_CURSEFORGE_PRUNE="${HYTALE_CURSEFORGE_PRUNE:-false}"
 HYTALE_CURSEFORGE_LOCK="${HYTALE_CURSEFORGE_LOCK:-true}"
+HYTALE_CURSEFORGE_EXPAND_REFS_ONLY="${HYTALE_CURSEFORGE_EXPAND_REFS_ONLY:-false}"
+
+if is_true "${HYTALE_CURSEFORGE_EXPAND_REFS_ONLY}"; then
+  expand_refs "${HYTALE_CURSEFORGE_MODS}"
+  exit 0
+fi
 
 if ! command -v jq >/dev/null 2>&1; then
   log "ERROR: CurseForge mods: jq is required but was not found"
@@ -395,32 +437,6 @@ resolve_best_file() {
   fi
 
   printf '%s' "${best_json}"
-}
-
-expand_refs() {
-  input="$1"
-  for token in $input; do
-    case "${token}" in
-      @*)
-        path="${token#@}"
-        if [ -f "${path}" ]; then
-          while IFS= read -r line || [ -n "${line}" ]; do
-            line="$(printf '%s' "${line}" | sed 's/#.*$//')"
-            line="$(trim "${line}")"
-            if [ -z "${line}" ]; then
-              continue
-            fi
-            printf '%s\n' "${line}"
-          done <"${path}"
-        else
-          log "WARNING: listing file not found: ${path}"
-        fi
-        ;;
-      *)
-        printf '%s\n' "${token}"
-        ;;
-    esac
-  done
 }
 
 errors=0
