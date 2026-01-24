@@ -271,7 +271,7 @@ In JSON:
 | `JVM_EXTRA_ARGS` | *(empty)* | Extra JVM args appended to the `java` command. |
 | `ENABLE_AOT` | `auto` | `auto\|true\|false\|generate` (controls `-XX:AOTCache=...`). |
 | `EXTRA_SERVER_ARGS` | *(empty)* | Extra server args appended at the end. |
-| `HYTALE_ALLOW_OP` | `true` | If `true`, enables the `/op` command. |
+| `HYTALE_ALLOW_OP` | `false` | If `true`, enables the `/op self` command. |
 | `HYTALE_BARE` | `false` | If `true`, passes `--bare`. |
 | `HYTALE_BOOT_COMMAND` | *(empty)* | Passed as `--boot-command`. |
 | `HYTALE_DISABLE_ASSET_COMPARE` | `false` | If `true`, passes `--disable-asset-compare`. |
