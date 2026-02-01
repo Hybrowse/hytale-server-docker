@@ -384,6 +384,7 @@ In JSON:
 | `HYTALE_CURSEFORGE_HTTP_CACHE_URL` | *(empty)* | Optional HTTP cache gateway base URL used for both API requests and file downloads. |
 | `HYTALE_CURSEFORGE_HTTP_CACHE_API_URL` | *(empty)* | Optional HTTP cache gateway base URL used for CurseForge API requests only. Defaults to `HYTALE_CURSEFORGE_HTTP_CACHE_URL`. |
 | `HYTALE_CURSEFORGE_HTTP_CACHE_DOWNLOAD_URL` | *(empty)* | Optional HTTP cache gateway base URL used for mod file downloads only. Defaults to `HYTALE_CURSEFORGE_HTTP_CACHE_URL`. |
+| `HYTALE_CURSEFORGE_DEBUG` | `false` | If `true`, prints additional diagnostics on API and download failures (does not print the API key). |
 
 See: [`curseforge-mods.md`](curseforge-mods.md)
 

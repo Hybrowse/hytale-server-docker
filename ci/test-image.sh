@@ -205,6 +205,104 @@ if echo "${out}" | grep -q "${TOKEN_VALUE}"; then
 fi
 pass "token values are not logged"
 
+workdir_cf="$(mktemp -d)"
+chmod 0777 "${workdir_cf}"
+cf_net="cf-mock-$$"
+cf_mock_name="cf-mock-$$"
+
+cf_cleanup() {
+  if [ -n "${cf_mock_cid:-}" ]; then
+    docker stop "${cf_mock_cid}" >/dev/null 2>&1 || true
+  fi
+  docker network rm "${cf_net}" >/dev/null 2>&1 || true
+  rm -rf "${workdir_cf}" || true
+}
+
+trap cf_cleanup EXIT INT TERM
+
+docker network create "${cf_net}" >/dev/null 2>&1 || fail "failed to create docker network ${cf_net}"
+
+cf_mock_cid="$(docker run -d --rm --name "${cf_mock_name}" --network "${cf_net}" python:3.12-alpine \
+  python -u -c '
+import http.server
+import socketserver
+import json
+
+class H(http.server.BaseHTTPRequestHandler):
+  def do_GET(self):
+    p = self.path.split("?", 1)[0]
+    if p == "/v1/games":
+      self.send_response(200)
+      self.send_header("Content-Type", "application/json")
+      self.end_headers()
+      self.wfile.write(b"{}")
+      return
+
+    if p == "/v1/mods/1429212/files/7497865":
+      body = json.dumps({"data": {"id": 7497865, "fileName": "gravestones.jar", "releaseType": 1, "hashes": []}}).encode("utf-8")
+      self.send_response(200)
+      self.send_header("Content-Type", "application/json")
+      self.send_header("Content-Length", str(len(body)))
+      self.end_headers()
+      self.wfile.write(body)
+      return
+
+    if p == "/v1/mods/1429212/files/7497865/download-url":
+      self.send_response(403)
+      self.end_headers()
+      return
+
+    self.send_response(404)
+    self.end_headers()
+
+  def log_message(self, fmt, *args):
+    return
+
+socketserver.TCPServer.allow_reuse_address = True
+socketserver.TCPServer(("0.0.0.0", 8080), H).serve_forever()
+' 2>/dev/null)"
+
+[ -n "${cf_mock_cid}" ] || fail "failed to start mock CurseForge API server"
+
+ready=0
+for _i in 1 2 3 4 5 6 7 8 9 10; do
+  if docker exec "${cf_mock_name}" python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/v1/games', timeout=1).read()" >/dev/null 2>&1; then
+    ready=1
+    break
+  fi
+  sleep 0.2
+done
+[ "${ready}" -eq 1 ] || fail "mock CurseForge API server did not become ready"
+
+set +e
+out="$(docker run --rm --network "${cf_net}" \
+  --entrypoint /usr/local/bin/hytale-curseforge-mods \
+  -e HYTALE_CURSEFORGE_DEBUG=true \
+  -e HYTALE_CURSEFORGE_FAIL_ON_ERROR=true \
+  -e HYTALE_CURSEFORGE_HTTP_CACHE_API_URL="http://${cf_mock_name}:8080" \
+  -e HYTALE_CURSEFORGE_MODS="1429212:7497865" \
+  -e HYTALE_CURSEFORGE_API_KEY='$2a$10$0000000000000000000000' \
+  -v "${workdir_cf}:/data" \
+  "${IMAGE_NAME}" 2>&1)"
+status=$?
+set -e
+
+trap - EXIT INT TERM
+cf_cleanup
+
+[ ${status} -ne 0 ] || fail "expected non-zero exit status when CurseForge mod install fails with HYTALE_CURSEFORGE_FAIL_ON_ERROR=true"
+if ! echo "${out}" | grep -q "WARNING: failed to install mod 1429212"; then
+  echo "${out}" >&2
+  fail "expected mod install failure warning"
+fi
+echo "${out}" | grep -q "CurseForge API returned HTTP 403" || fail "expected actionable HTTP 403 hint"
+if printf '%s' "${out}" | grep -qF "attempt 2/3" 2>/dev/null; then
+  fail "did not expect retry attempt 2/3 on HTTP 403"
+fi
+count="$(printf '%s' "${out}" | grep -cF "attempt 1/3" 2>/dev/null || true)"
+[ "${count}" -eq 1 ] || fail "expected exactly one attempt on HTTP 403 (attempt 1/3), got ${count}"
+pass "CurseForge mods HTTP 403 has actionable hint and does not retry"
+
 # Test 7b: token broker must fail fast when enabled without URL
 set +e
 out="$(docker run --rm \

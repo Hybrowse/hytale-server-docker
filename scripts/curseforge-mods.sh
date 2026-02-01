@@ -5,6 +5,13 @@ log() {
   printf '%s\n' "$*" >&2
 }
 
+debug_enabled=0
+debug() {
+  if [ "${debug_enabled}" -eq 1 ]; then
+    log "CurseForge mods: DEBUG: $*"
+  fi
+}
+
 lower() {
   printf '%s' "${1:-}" | tr '[:upper:]' '[:lower:]'
 }
@@ -79,6 +86,11 @@ HYTALE_CURSEFORGE_GAME_VERSION_FILTER="${HYTALE_CURSEFORGE_GAME_VERSION_FILTER:-
 HYTALE_CURSEFORGE_PRUNE="${HYTALE_CURSEFORGE_PRUNE:-false}"
 HYTALE_CURSEFORGE_LOCK="${HYTALE_CURSEFORGE_LOCK:-true}"
 HYTALE_CURSEFORGE_EXPAND_REFS_ONLY="${HYTALE_CURSEFORGE_EXPAND_REFS_ONLY:-false}"
+HYTALE_CURSEFORGE_DEBUG="${HYTALE_CURSEFORGE_DEBUG:-false}"
+
+if is_true "${HYTALE_CURSEFORGE_DEBUG}"; then
+  debug_enabled=1
+fi
 
 if is_true "${HYTALE_CURSEFORGE_EXPAND_REFS_ONLY}"; then
   expand_refs "${HYTALE_CURSEFORGE_MODS}"
@@ -271,6 +283,30 @@ case "$(lower "${HYTALE_CURSEFORGE_RELEASE_CHANNEL}")" in
     ;;
 esac
 
+write_manifest() {
+  tmp="${MANIFEST_PATH}.tmp.$$"
+  jq . "${MANIFEST_PATH}" >"${tmp}"
+  mv -f "${tmp}" "${MANIFEST_PATH}"
+}
+
+url_without_query() {
+  url="${1:-}"
+  printf '%s' "${url}" | sed 's/[?].*$//'
+}
+
+redact_url() {
+  url_without_query "${1:-}"
+}
+
+safe_filename() {
+  printf '%s' "${1:-}" | sed -e 's,[/[:space:]],_,g' -e 's/[^A-Za-z0-9._-]/_/g'
+}
+
+cf_last_http_code="000"
+cf_last_rc=0
+cf_last_url=""
+cf_last_body=""
+
 cf_get() {
   path="$1"
   url="${CF_API_BASE}${path}"
@@ -280,28 +316,48 @@ cf_get() {
     host_header="${CF_API_HOST}"
   fi
   for attempt in 1 2 3; do
+    out=""
+    http_code="000"
+    rc=0
+    cf_last_url="$(redact_url "${url}")"
+    set +e
     if [ -n "${host_header}" ]; then
-      out="$(curl -fsSL --max-time 30 --connect-timeout 10 -H "Host: ${host_header}" -H "Accept: application/json" -H "x-api-key: ${HYTALE_CURSEFORGE_API_KEY}" "${url}" 2>/dev/null || true)"
+      resp="$(curl -sS -L --max-time 30 --connect-timeout 10 -w '\n__HTTP_CODE__:%{http_code}' -H "Host: ${host_header}" -H "Accept: application/json" -H "x-api-key: ${HYTALE_CURSEFORGE_API_KEY}" "${url}" 2>/dev/null)"
+      rc=$?
     else
-      out="$(curl -fsSL --max-time 30 --connect-timeout 10 -H "Accept: application/json" -H "x-api-key: ${HYTALE_CURSEFORGE_API_KEY}" "${url}" 2>/dev/null || true)"
+      resp="$(curl -sS -L --max-time 30 --connect-timeout 10 -w '\n__HTTP_CODE__:%{http_code}' -H "Accept: application/json" -H "x-api-key: ${HYTALE_CURSEFORGE_API_KEY}" "${url}" 2>/dev/null)"
+      rc=$?
     fi
-    if [ -n "${out}" ]; then
-      printf '%s' "${out}"
-      return 0
-    fi
+    set -e
+
+    http_code="$(printf '%s\n' "${resp}" | awk -F: '/^__HTTP_CODE__:/ {print $2}' | tail -n 1 2>/dev/null || echo "000")"
+    out="$(printf '%s\n' "${resp}" | sed '$d' 2>/dev/null || true)"
+
+    cf_last_http_code="${http_code}"
+    cf_last_rc="${rc}"
+    cf_last_body="${out}"
+
+    case "${http_code}" in
+      2??)
+        if [ -n "${out}" ]; then
+          return 0
+        fi
+        ;;
+      429|5??)
+        ;;
+      4??)
+        debug "API request failed (attempt ${attempt}/3, rc=${rc}, http=${http_code}): ${cf_last_url}"
+        if [ -n "${out}" ]; then
+          debug "API error body (truncated): $(printf '%s' "${out}" | cut -c1-200)"
+        fi
+        return 1
+        ;;
+    esac
+
+    debug "API request failed (attempt ${attempt}/3, rc=${rc}, http=${http_code}): ${cf_last_url}"
     sleep "${attempt}"
   done
   return 1
-}
-
-write_manifest() {
-  tmp="${MANIFEST_PATH}.tmp.$$"
-  jq . "${MANIFEST_PATH}" >"${tmp}"
-  mv -f "${tmp}" "${MANIFEST_PATH}"
-}
-
-safe_filename() {
-  printf '%s' "${1:-}" | sed -e 's,[/[:space:]],_,g' -e 's/[^A-Za-z0-9._-]/_/g'
 }
 
 download_and_install() {
@@ -311,9 +367,23 @@ download_and_install() {
   file_name="$(printf '%s' "${file_json}" | jq -r '.fileName')"
   release_type="$(printf '%s' "${file_json}" | jq -r '.releaseType // empty')"
 
-  dl_json="$(cf_get "/v1/mods/${mod_id}/files/${file_id}/download-url")" || return 1
+  install_error_reason=""
+
+  if ! cf_get "/v1/mods/${mod_id}/files/${file_id}/download-url"; then
+    case "${cf_last_http_code}" in
+      403)
+        install_error_reason="failed to resolve download URL (CurseForge API returned HTTP 403 - the author may have disabled third-party/API downloads for this project)"
+        ;;
+      *)
+        install_error_reason="failed to resolve download URL (CurseForge API request failed, http=${cf_last_http_code})"
+        ;;
+    esac
+    return 1
+  fi
+  dl_json="${cf_last_body}"
   download_url="$(printf '%s' "${dl_json}" | jq -r '.data // empty')"
   if [ -z "${download_url}" ]; then
+    install_error_reason="failed to resolve download URL (empty response)"
     return 1
   fi
 
@@ -343,32 +413,47 @@ download_and_install() {
   dest_path="${dest_dir}/${file_name}"
 
   tmp_dl="${DOWNLOADS_DIR}/${mod_id}-${file_id}.tmp.$$"
+  dl_ok=0
+  http_code="000"
+  rc=0
+  set +e
   if [ -n "${download_host_header}" ]; then
-    dl_ok=0
-    if curl -fL --max-time 300 --connect-timeout 30 --retry 3 --retry-delay 1 -H "Host: ${download_host_header}" -o "${tmp_dl}" "${download_fetch_url}" >/dev/null 2>&1; then
-      dl_ok=1
-    fi
+    http_code="$(curl -sS -fL --max-time 300 --connect-timeout 30 --retry 3 --retry-delay 1 -H "Host: ${download_host_header}" -o "${tmp_dl}" -w "%{http_code}" "${download_fetch_url}" 2>/dev/null)"
+    rc=$?
   else
-    dl_ok=0
-    if curl -fL --max-time 300 --connect-timeout 30 --retry 3 --retry-delay 1 -o "${tmp_dl}" "${download_fetch_url}" >/dev/null 2>&1; then
-      dl_ok=1
-    fi
+    http_code="$(curl -sS -fL --max-time 300 --connect-timeout 30 --retry 3 --retry-delay 1 -o "${tmp_dl}" -w "%{http_code}" "${download_fetch_url}" 2>/dev/null)"
+    rc=$?
+  fi
+  set -e
+  if [ "${rc}" -eq 0 ]; then
+    dl_ok=1
   fi
   if [ "${dl_ok}" -ne 1 ]; then
     rm -f "${tmp_dl}" 2>/dev/null || true
+    install_error_reason="download failed (rc=${rc}, http=${http_code}, url=$(redact_url "${download_url}"))"
+    debug "Download failed for mod ${mod_id} file ${file_id} (${file_name}) (rc=${rc}, http=${http_code})"
+    debug "- download-url: $(redact_url "${download_url}")"
+    debug "- fetch-url: $(redact_url "${download_fetch_url}")"
     return 1
+  fi
+
+  size_bytes="$(wc -c <"${tmp_dl}" 2>/dev/null | tr -d ' ' || true)"
+  if [ -n "${size_bytes}" ]; then
+    debug "Downloaded mod ${mod_id} file ${file_id} (${file_name}) size=${size_bytes} bytes"
   fi
 
   if [ -n "${sha1}" ]; then
     got="$(sha1sum "${tmp_dl}" 2>/dev/null | awk '{print $1}' || true)"
     if [ -z "${got}" ] || [ "${got}" != "${sha1}" ]; then
       rm -f "${tmp_dl}" 2>/dev/null || true
+      install_error_reason="sha1 mismatch (expected=${sha1}, got=${got})"
       return 1
     fi
   elif [ -n "${md5}" ]; then
     got="$(md5sum "${tmp_dl}" 2>/dev/null | awk '{print $1}' || true)"
     if [ -z "${got}" ] || [ "${got}" != "${md5}" ]; then
       rm -f "${tmp_dl}" 2>/dev/null || true
+      install_error_reason="md5 mismatch (expected=${md5}, got=${got})"
       return 1
     fi
   fi
@@ -449,7 +534,10 @@ resolve_best_file() {
   best_date=""
 
   while :; do
-    page="$(cf_get "/v1/mods/${mod_id}/files?index=${index}&pageSize=${page_size}")" || break
+    if ! cf_get "/v1/mods/${mod_id}/files?index=${index}&pageSize=${page_size}"; then
+      break
+    fi
+    page="${cf_last_body}"
     count="$(printf '%s' "${page}" | jq -r '.data | length' 2>/dev/null || echo 0)"
     if [ "${count}" -eq 0 ]; then
       break
@@ -549,11 +637,12 @@ while IFS= read -r ref || [ -n "${ref}" ]; do
       fi
     fi
 
-    file_resp="$(cf_get "/v1/mods/${mod_id}/files/${file_id}")" || {
+    if ! cf_get "/v1/mods/${mod_id}/files/${file_id}"; then
       log "WARNING: could not resolve ${ref}"
       errors=$((errors + 1))
       continue
-    }
+    fi
+    file_resp="${cf_last_body}"
     file_json="$(printf '%s' "${file_resp}" | jq -c '.data // empty' 2>/dev/null || true)"
     if [ -z "${file_json}" ] || [ "${file_json}" = "null" ]; then
       log "WARNING: could not resolve ${ref}"
@@ -597,7 +686,11 @@ while IFS= read -r ref || [ -n "${ref}" ]; do
   fi
 
   if ! download_and_install "${mod_id}" "${file_json}" >/dev/null; then
-    log "WARNING: failed to install mod ${mod_id}"
+    if [ -n "${install_error_reason}" ]; then
+      log "WARNING: failed to install mod ${mod_id}: ${install_error_reason}"
+    else
+      log "WARNING: failed to install mod ${mod_id}"
+    fi
     errors=$((errors + 1))
     continue
   fi

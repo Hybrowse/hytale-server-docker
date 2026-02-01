@@ -191,6 +191,23 @@ Monitor and experiment with different values.
 
 See: [`configuration.md`](configuration.md#jvm-heap-tuning)
 
+## CurseForge mods: HTTP 403 when resolving download URL
+
+**Symptom:** You see a warning like:
+
+```text
+WARNING: failed to install mod <modId>: failed to resolve download URL (CurseForge API returned HTTP 403 ...)
+```
+
+**Cause:** CurseForge returned HTTP 403 for the `download-url` endpoint. This often means the mod author has disabled third-party/API downloads for the project.
+
+**Fix:**
+
+- Remove the mod from `HYTALE_CURSEFORGE_MODS`.
+- If the mod is essential, ask the author to enable API downloads or install the mod manually.
+
+**Debug:** Set `HYTALE_CURSEFORGE_DEBUG=true` to print additional diagnostics on API failures.
+
 ## Related docs
 
 - [`quickstart.md`](quickstart.md)
