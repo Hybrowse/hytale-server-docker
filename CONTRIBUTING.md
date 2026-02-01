@@ -35,6 +35,14 @@ Please include:
 - update docs if behavior changes
 - be explicit about security implications
 
+### CLA
+
+If your pull request is accepted, you may be asked to agree to the Contributor License Agreement (CLA):
+
+- [`CLA.md`](CLA.md)
+
+We may close pull requests unmerged if they are out of scope or would increase operational/security risk.
+
 ### DCO (sign-off required)
 
 We require a Developer Certificate of Origin (DCO) sign-off on all commits.

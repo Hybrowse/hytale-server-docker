@@ -16,6 +16,8 @@ This section documents the Docker image:
 This project is intended to help *run* the official Hytale dedicated server in containers.
 It should **not** be used to redistribute proprietary server binaries.
 
+For legal/policy notes (unofficial status, no redistribution, and operator responsibilities), see the repository [`README.md`](../../README.md).
+
 ## Pages
 
 - Start here: [`quickstart.md`](quickstart.md)

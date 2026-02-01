@@ -95,6 +95,7 @@ See [`ROADMAP.md`](ROADMAP.md) for details. Highlights:
 ## Contributing & Security
  
 - [`CONTRIBUTING.md`](CONTRIBUTING.md)
+- [`LICENSING.md`](LICENSING.md)
 - [`SECURITY.md`](SECURITY.md)
 
 ## Local verification
@@ -109,6 +110,23 @@ Install Task:
 
 - https://taskfile.dev/
  
+## Legal and policy notes
+
+This is an **unofficial** community project and is not affiliated with or endorsed by Hypixel Studios Canada Inc.
+
+This repository and image do not redistribute proprietary Hytale game/server files.
+Server operators are responsible for complying with the Hytale EULA, Terms of Service, and Server Operator Policies (including monetization and branding rules): https://hytale.com/server-policies
+
 ## License
  
-See [`LICENSE`](LICENSE) and [`NOTICE`](NOTICE).
+Current repository license (releases after v0.4.0): [`LICENSE`](LICENSE)
+
+Apache-2.0 license text for releases v0.4.0 and older: [`LICENSE-APACHE-2.0`](LICENSE-APACHE-2.0)
+
+See also: [`NOTICE`](NOTICE).
+
+For an overview (including commercial agreements and trademarks), see:
+
+- [`LICENSING.md`](LICENSING.md)
+- [`COMMERCIAL_LICENSE.md`](COMMERCIAL_LICENSE.md)
+- [`TRADEMARKS.md`](TRADEMARKS.md)

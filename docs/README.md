@@ -11,3 +11,5 @@ We aim to keep these docs practical and operations-focused.
 For authoritative information, always refer to the official Hytale documentation:
 
 - https://support.hytale.com/hc/en-us/articles/45326769420827-Hytale-Server-Manual
+
+For legal/policy notes (unofficial status, no redistribution, and operator responsibilities), see the repository [`README.md`](../../README.md).

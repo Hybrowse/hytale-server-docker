@@ -9,6 +9,8 @@ This document describes security hardening recommendations for running the `hybr
 - Prefer **least-privilege** runtime settings.
 - Avoid changes that accidentally redistribute proprietary server assets.
 
+For legal/policy notes (unofficial status, no redistribution, and operator responsibilities), see the repository [`README.md`](../../README.md).
+
 ## Secrets
 
 Treat these as secrets and avoid placing them in plain text config repositories:

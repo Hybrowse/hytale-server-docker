@@ -14,6 +14,8 @@ Manual provisioning is needed if:
 This Docker image runs the official Hytale dedicated server binaries from a mounted volume.
 This repository and image **do not** redistribute proprietary Hytale server binaries or assets.
 
+You are responsible for obtaining the required files via official channels and for complying with the Hytale EULA, Terms of Service, and Server Operator Policies: https://hytale.com/server-policies
+
 You must provide these files yourself:
 
 - `Assets.zip`
