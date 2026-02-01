@@ -96,7 +96,7 @@ tasks:
     cmds:
       - task: build:amd64
       - docker rm -f {{.DEV_CONTAINER_NAME}} 2>/dev/null || true
-      - docker run -d -it --platform linux/amd64 --name {{.DEV_CONTAINER_NAME}} -e CFG_MOTD=Test -e HYTALE_AUTO_DOWNLOAD=true -p {{.DEV_PORT}}:5520/udp -v {{.DEV_DATA_DIR}}:/data {{.IMAGE_NAME_AMD64}}
+      - docker run -d -it --platform linux/amd64 --name {{.DEV_CONTAINER_NAME}} -e CFG_MOTD=Test -e=CFG_MAX_PLAYERS=50 -e HYTALE_AUTO_DOWNLOAD=true -p {{.DEV_PORT}}:5520/udp -v {{.DEV_DATA_DIR}}:/data {{.IMAGE_NAME_AMD64}}
 
   dev:up:curseforge:
     desc: Start a local server container with CurseForge mod auto-download (requires CURSEFORGE_API_KEY env var or ./.secrets/curseforge_api_key.txt)

@@ -46,6 +46,9 @@ On subsequent runs, this step is skipped (credentials are stored on the `/data` 
 > [!IMPORTANT]
 > **After** the server starts, you must authenticate it before players can connect.
 > If you skip this step, players will see: *"Server authentication unavailable - please try again later"*
+>
+> Provider/fleet option: if you use **the [Hytale Session Token Broker](https://github.com/Hybrowse/hytale-session-token-broker) by Hybrowse**, you can fetch `HYTALE_SERVER_SESSION_TOKEN` / `HYTALE_SERVER_IDENTITY_TOKEN` at container startup and skip the interactive `/auth` flow.
+> See: [`configuration.md`](configuration.md#optional-session-token-broker-skip-auth)
 
 ## 3. Server authentication (required for player connections)
 

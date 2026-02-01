@@ -51,6 +51,59 @@ Advanced (providers / fleets):
 
 - [`../hytale/server-provider-auth.md`](../hytale/server-provider-auth.md) (tokens via `HYTALE_SERVER_SESSION_TOKEN` / `HYTALE_SERVER_IDENTITY_TOKEN`)
 
+### Optional: Session Token Broker (skip `/auth`)
+
+If you run **the [Hytale Session Token Broker](https://github.com/Hybrowse/hytale-session-token-broker) by Hybrowse**, this image can fetch `session_token` and `identity_token` from it at container startup and pass them to the server process.
+
+When both `HYTALE_SERVER_SESSION_TOKEN` and `HYTALE_SERVER_IDENTITY_TOKEN` are already set, the broker is skipped.
+
+This is primarily intended for **providers / fleets / networks** that want non-interactive authentication without attaching to the server console.
+The reference broker implementation by Hybrowse lives here: [Hytale Session Token Broker](https://github.com/Hybrowse/hytale-session-token-broker)
+
+Operational model (mental model):
+
+- The broker persists long-lived OAuth state (refresh token) and mints short-lived game session tokens on demand.
+- This image only sees the short-lived `HYTALE_SERVER_SESSION_TOKEN` / `HYTALE_SERVER_IDENTITY_TOKEN` at startup and passes them to the Java process.
+
+Security notes:
+
+- Treat `HYTALE_SERVER_SESSION_TOKEN`, `HYTALE_SERVER_IDENTITY_TOKEN`, and `HYTALE_SESSION_TOKEN_BROKER_BEARER_TOKEN` as **secrets**.
+- Prefer file-based secrets: set `HYTALE_SESSION_TOKEN_BROKER_BEARER_TOKEN_SRC` and mount it read-only.
+
+Operational notes:
+
+- If the container is in a crash/restart loop after the broker step (for example due to invalid config or broken plugins), you may mint tokens repeatedly.
+  To reduce token minting in crash/restart loops, set `HYTALE_SESSION_TOKEN_BROKER_MIN_RETRY_INTERVAL_SECONDS`.
+- If you run a large fleet, consider protecting the broker with an HTTP bearer token and applying startup jitter on your orchestration side to avoid thundering-herd effects.
+
+Minimal example (Docker Compose):
+
+```yaml
+services:
+  hytale:
+    environment:
+      HYTALE_SESSION_TOKEN_BROKER_ENABLED: "true"
+      HYTALE_SESSION_TOKEN_BROKER_URL: "http://broker:8080"
+      HYTALE_SESSION_TOKEN_BROKER_TIMEOUT_SECONDS: "10"
+```
+
+With HTTP bearer token (recommended as file-based secret):
+
+```yaml
+services:
+  hytale:
+    secrets:
+      - broker_bearer
+    environment:
+      HYTALE_SESSION_TOKEN_BROKER_ENABLED: "true"
+      HYTALE_SESSION_TOKEN_BROKER_URL: "http://broker:8080"
+      HYTALE_SESSION_TOKEN_BROKER_BEARER_TOKEN_SRC: "/run/secrets/broker_bearer"
+
+secrets:
+  broker_bearer:
+    file: ./secrets/broker_bearer_token
+```
+
 ## Mods
 
 This image supports **automatic mod download and updates from CurseForge**.
@@ -249,6 +302,15 @@ In JSON:
 | `HYTALE_BACKUP_MAX_COUNT` | `5` | Passed as `--backup-max-count`. |
 | `HYTALE_SERVER_SESSION_TOKEN` | *(empty)* | Passed as `--session-token` (**secret**). |
 | `HYTALE_SERVER_IDENTITY_TOKEN` | *(empty)* | Passed as `--identity-token` (**secret**). |
+| `HYTALE_SESSION_TOKEN_BROKER_ENABLED` | `false` | If `true`, fetches server session/identity tokens from the Session Token Broker before starting the server. |
+| `HYTALE_SESSION_TOKEN_BROKER_URL` | *(empty)* | Base URL for the broker (e.g. `http://broker:8080`). |
+| `HYTALE_SESSION_TOKEN_BROKER_BEARER_TOKEN` | *(empty)* | Optional HTTP bearer token for the broker API (**secret**). |
+| `HYTALE_SESSION_TOKEN_BROKER_BEARER_TOKEN_SRC` | *(empty)* | Optional path to a file containing the broker bearer token (Docker/Kubernetes secrets recommended). |
+| `HYTALE_SESSION_TOKEN_BROKER_ACCOUNT` | *(empty)* | Optional broker account name for minting (sent as `account`). |
+| `HYTALE_SESSION_TOKEN_BROKER_PROFILE_UUIDS` | *(empty)* | Optional pool of profile UUIDs (comma/space-separated) for fallback (sent as `profile_uuids`). |
+| `HYTALE_SESSION_TOKEN_BROKER_TIMEOUT_SECONDS` | `10` | Request timeout for the broker HTTP call. |
+| `HYTALE_SESSION_TOKEN_BROKER_FAIL_ON_ERROR` | `true` | If `true`, fails container startup when the broker request fails. If `false`, continues without broker tokens. |
+| `HYTALE_SESSION_TOKEN_BROKER_MIN_RETRY_INTERVAL_SECONDS` | *(empty)* | If set: minimum time between successful broker token fetches. Prevents token minting spam on restart loops by waiting before minting again. |
 | `HYTALE_AUTO_DOWNLOAD` | `false` | If `true`, downloads server files and `Assets.zip` via the official Hytale Downloader when missing. |
 | `HYTALE_AUTO_UPDATE` | `true` | If `true`, checks for updates on each start (compares remote version vs local). Only downloads when an update is available. |
 | `HYTALE_CONSOLE_PIPE` | `true` | If `true`, enables the console command pipe used by `hytale-cli`. If `false`, the server uses normal stdin and `hytale-cli` is disabled. |

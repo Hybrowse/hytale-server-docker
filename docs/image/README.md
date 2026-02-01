@@ -5,6 +5,13 @@ This section documents the Docker image:
 - `hybrowse/hytale-server` (Docker Hub, primary)
 - `ghcr.io/hybrowse/hytale-server` (GHCR mirror)
 
+## Hybrowse Server Stack
+
+The Hytale Server Docker Image is part of the **Hybrowse Server Stack**:
+
+- [Hybrowse/hytale-session-token-broker](https://github.com/Hybrowse/hytale-session-token-broker) — non-interactive server authentication for providers/fleets
+- [Hybrowse/hyrouter](https://github.com/Hybrowse/hyrouter) — stateless QUIC entrypoint and referral router for routing players to backends
+
 ## Goals
 
 - **Production-grade defaults** (security, stability, predictable behavior)

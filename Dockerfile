@@ -19,9 +19,10 @@ COPY scripts/cfg-interpolate.sh /usr/local/bin/hytale-cfg-interpolate
 COPY scripts/auto-download.sh /usr/local/bin/hytale-auto-download
 COPY scripts/curseforge-mods.sh /usr/local/bin/hytale-curseforge-mods
 COPY scripts/prestart-downloads.sh /usr/local/bin/hytale-prestart-downloads
+COPY scripts/session-token-broker.sh /usr/local/bin/hytale-session-token-broker
 COPY scripts/hytale-cli.sh /usr/local/bin/hytale-cli
 COPY scripts/healthcheck.sh /usr/local/bin/hytale-healthcheck
-RUN chmod 0755 /usr/local/bin/hytale-entrypoint /usr/local/bin/hytale-cfg-interpolate /usr/local/bin/hytale-auto-download /usr/local/bin/hytale-curseforge-mods /usr/local/bin/hytale-prestart-downloads /usr/local/bin/hytale-cli /usr/local/bin/hytale-healthcheck
+RUN chmod 0755 /usr/local/bin/hytale-entrypoint /usr/local/bin/hytale-cfg-interpolate /usr/local/bin/hytale-auto-download /usr/local/bin/hytale-curseforge-mods /usr/local/bin/hytale-prestart-downloads /usr/local/bin/hytale-session-token-broker /usr/local/bin/hytale-cli /usr/local/bin/hytale-healthcheck
 
 RUN mkdir -p /usr/share/licenses/hybrowse-hytale-server
 COPY LICENSE LICENSE-APACHE-2.0 NOTICE LICENSING.md COMMERCIAL_LICENSE.md TRADEMARKS.md /usr/share/licenses/hybrowse-hytale-server/

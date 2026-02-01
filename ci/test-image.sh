@@ -205,6 +205,54 @@ if echo "${out}" | grep -q "${TOKEN_VALUE}"; then
 fi
 pass "token values are not logged"
 
+# Test 7b: token broker must fail fast when enabled without URL
+set +e
+out="$(docker run --rm \
+  -e HYTALE_SESSION_TOKEN_BROKER_ENABLED=true \
+  -v "${workdir}:/data" "${IMAGE_NAME}" 2>&1)"
+status=$?
+set -e
+[ ${status} -ne 0 ] || fail "expected non-zero exit status when broker enabled without URL"
+echo "${out}" | grep -q "HYTALE_SESSION_TOKEN_BROKER_URL is empty" || fail "expected missing broker URL error"
+pass "broker fails fast when enabled without URL"
+
+# Test 7c: token broker can continue on error when configured
+set +e
+out="$(docker run --rm \
+  -e HYTALE_SESSION_TOKEN_BROKER_ENABLED=true \
+  -e HYTALE_SESSION_TOKEN_BROKER_URL=http://127.0.0.1:9 \
+  -e HYTALE_SESSION_TOKEN_BROKER_TIMEOUT_SECONDS=1 \
+  -e HYTALE_SESSION_TOKEN_BROKER_FAIL_ON_ERROR=false \
+  -v "${workdir}:/data" "${IMAGE_NAME}" 2>&1)"
+status=$?
+set -e
+[ ${status} -ne 0 ] || fail "expected java to fail with dummy jar"
+echo "${out}" | grep -q "Continuing without token broker tokens" || fail "expected broker continue warning"
+echo "${out}" | grep -q "Starting Hytale dedicated server" || fail "expected server start log when broker continues"
+pass "broker can continue on error"
+
+# Test 7d: broker bearer token from file must never be logged
+BROKER_TOKEN_VALUE="broker-bearer-super-secret"
+token_file="$(mktemp)"
+printf '%s' "${BROKER_TOKEN_VALUE}" >"${token_file}"
+set +e
+out="$(docker run --rm \
+  -e HYTALE_SESSION_TOKEN_BROKER_ENABLED=true \
+  -e HYTALE_SESSION_TOKEN_BROKER_URL=http://127.0.0.1:9 \
+  -e HYTALE_SESSION_TOKEN_BROKER_TIMEOUT_SECONDS=1 \
+  -e HYTALE_SESSION_TOKEN_BROKER_FAIL_ON_ERROR=false \
+  -e HYTALE_SESSION_TOKEN_BROKER_BEARER_TOKEN_SRC=/run/secrets/broker_bearer_token \
+  -v "${token_file}:/run/secrets/broker_bearer_token:ro" \
+  -v "${workdir}:/data" "${IMAGE_NAME}" 2>&1)"
+status=$?
+set -e
+rm -f "${token_file}" || true
+[ ${status} -ne 0 ] || fail "expected java to fail with dummy jar"
+if echo "${out}" | grep -q "${BROKER_TOKEN_VALUE}"; then
+  fail "broker bearer token value was logged"
+fi
+pass "broker bearer token value is not logged"
+
 # Test 8: machine-id is generated and persisted
 workdir5="$(mktemp -d)"
 chmod 0777 "${workdir5}"

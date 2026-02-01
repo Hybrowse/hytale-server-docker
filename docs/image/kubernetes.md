@@ -125,7 +125,15 @@ persistence:
 env:
   HYTALE_AUTO_DOWNLOAD: "true"
   HYTALE_AUTO_UPDATE: "true"
+
+  # Optional (advanced): fetch server session/identity tokens from the Hytale Session Token Broker by Hybrowse
+  # and skip the interactive /auth flow.
+  HYTALE_SESSION_TOKEN_BROKER_ENABLED: "true"
+  HYTALE_SESSION_TOKEN_BROKER_URL: "http://hytale-session-token-broker:8080"
 ```
+
+If your broker uses an HTTP bearer token, prefer mounting it as a file and set `HYTALE_SESSION_TOKEN_BROKER_BEARER_TOKEN_SRC`.
+You can do this via `extraVolumes` / `extraVolumeMounts` and `env`.
 
 ### Example: wiring secrets (server auth, CurseForge, downloader credentials)
 

@@ -7,6 +7,13 @@
 
 Automatic CurseForge mod management, auto-download with smart update detection, Helm chart, CLI, easy configuration, and quick troubleshooting.
 
+## Hybrowse Server Stack
+ 
+This image is part of the **Hybrowse Server Stack** — production-grade building blocks for running Hytale at scale:
+ 
+- **Non-interactive server authentication** via [Hybrowse/hytale-session-token-broker](https://github.com/Hybrowse/hytale-session-token-broker) (mints short-lived `session_token` / `identity_token` at startup to skip the interactive `/auth` flow)
+- **Stateless QUIC entrypoint + referral routing** via [Hybrowse/hyrouter](https://github.com/Hybrowse/hyrouter)
+
 Brought to you by [Hybrowse](https://hybrowse.gg) and the developer of [setupmc.com](https://setupmc.com).
 
 ## Image
@@ -44,6 +51,8 @@ docker compose up -d
 >
 > 1. **Downloader auth** (first run): follow the URL + device code in the logs to download server files
 > 2. **Server auth** (after startup): attach to the console (`docker compose attach hytale`), then run `/auth persistence Encrypted` followed by `/auth login device`
+>
+> Optional (advanced / providers): if you run **the [Hytale Session Token Broker](https://github.com/Hybrowse/hytale-session-token-broker) by Hybrowse**, you can fetch session/identity tokens at container startup and skip the interactive `/auth` flow. See: [`docs/image/configuration.md`](docs/image/configuration.md)
 
 Full guide: [`docs/image/quickstart.md`](docs/image/quickstart.md)
 
