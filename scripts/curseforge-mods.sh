@@ -83,7 +83,6 @@ HYTALE_CURSEFORGE_RELEASE_CHANNEL="${HYTALE_CURSEFORGE_RELEASE_CHANNEL:-release}
 HYTALE_CURSEFORGE_FAIL_ON_ERROR="${HYTALE_CURSEFORGE_FAIL_ON_ERROR:-false}"
 HYTALE_CURSEFORGE_CHECK_INTERVAL_SECONDS="${HYTALE_CURSEFORGE_CHECK_INTERVAL_SECONDS:-0}"
 HYTALE_CURSEFORGE_GAME_VERSION_FILTER="${HYTALE_CURSEFORGE_GAME_VERSION_FILTER:-}"
-HYTALE_CURSEFORGE_PRUNE="${HYTALE_CURSEFORGE_PRUNE:-false}"
 HYTALE_CURSEFORGE_LOCK="${HYTALE_CURSEFORGE_LOCK:-true}"
 HYTALE_CURSEFORGE_EXPAND_REFS_ONLY="${HYTALE_CURSEFORGE_EXPAND_REFS_ONLY:-false}"
 HYTALE_CURSEFORGE_DEBUG="${HYTALE_CURSEFORGE_DEBUG:-false}"
@@ -111,6 +110,20 @@ esac
 
 if [ -z "${HYTALE_CURSEFORGE_MODS}" ]; then
   exit 0
+fi
+
+CF_STANDARD_MODS_DIR="${DATA_DIR}/server/mods"
+CF_MODS_DIR="${HYTALE_MODS_PATH:-${DATA_DIR}/server/mods-curseforge}"
+
+if [ -z "${HYTALE_CURSEFORGE_PRUNE+x}" ]; then
+  mods_path_for_compare="${CF_MODS_DIR%/}"
+  standard_mods_path_for_compare="${CF_STANDARD_MODS_DIR%/}"
+  if [ "${mods_path_for_compare}" = "${standard_mods_path_for_compare}" ]; then
+    HYTALE_CURSEFORGE_PRUNE="false"
+  else
+    HYTALE_CURSEFORGE_PRUNE="true"
+  fi
+  debug "HYTALE_CURSEFORGE_PRUNE not set; defaulting to ${HYTALE_CURSEFORGE_PRUNE} (mods path: ${CF_MODS_DIR})"
 fi
 
 if [ -n "${HYTALE_CURSEFORGE_API_KEY_SRC}" ]; then
@@ -194,7 +207,6 @@ if [ "${test_http_code}" != "200" ]; then
 fi
 log "CurseForge mods: API key valid"
 
-CF_MODS_DIR="${HYTALE_MODS_PATH:-${DATA_DIR}/server/mods-curseforge}"
 STATE_DIR="${DATA_DIR}/.hytale-curseforge-mods"
 MANAGED_DIR="${STATE_DIR}"
 DOWNLOADS_DIR="${MANAGED_DIR}/downloads"

@@ -452,6 +452,33 @@ fi
 pass "read-only root filesystem does not cause machine-id error output"
 rm -rf "${workdir8}"
 
+# Test 11b: CurseForge prune default is true for non-standard mods path
+set +e
+out="$(docker run --rm \
+  --entrypoint /usr/local/bin/hytale-curseforge-mods \
+  -e HYTALE_CURSEFORGE_DEBUG=true \
+  -e HYTALE_CURSEFORGE_MODS="1409700" \
+  "${IMAGE_NAME}" 2>&1)"
+status=$?
+set -e
+[ ${status} -eq 0 ] || fail "expected zero exit status when HYTALE_CURSEFORGE_FAIL_ON_ERROR=false and API key is missing"
+echo "${out}" | grep -q "HYTALE_CURSEFORGE_PRUNE not set; defaulting to true" || fail "expected prune default=true log for non-standard mods path"
+pass "CurseForge prune defaults to true for non-standard mods path"
+
+# Test 11c: CurseForge prune default is false for standard mods path
+set +e
+out="$(docker run --rm \
+  --entrypoint /usr/local/bin/hytale-curseforge-mods \
+  -e HYTALE_CURSEFORGE_DEBUG=true \
+  -e HYTALE_CURSEFORGE_MODS="1409700" \
+  -e HYTALE_MODS_PATH=/data/server/mods \
+  "${IMAGE_NAME}" 2>&1)"
+status=$?
+set -e
+[ ${status} -eq 0 ] || fail "expected zero exit status when HYTALE_CURSEFORGE_FAIL_ON_ERROR=false and API key is missing"
+echo "${out}" | grep -q "HYTALE_CURSEFORGE_PRUNE not set; defaulting to false" || fail "expected prune default=false log for standard mods path"
+pass "CurseForge prune defaults to false for standard mods path"
+
 mods_multiline="$(printf '%s\n' \
   '1409700 # Serilum Hybrid' \
   '1423805 # Serilum WelcomeMessage' \
