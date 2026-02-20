@@ -24,6 +24,11 @@ Credentials are stored as:
 
 If that file already exists (for example from a previous run), downloads become non-interactive.
 
+For non-interactive operations (providers/fleets), use one of these patterns:
+
+- Seed downloader credentials via `HYTALE_DOWNLOADER_CREDENTIALS_SRC` (recommended if you keep `HYTALE_AUTO_DOWNLOAD=true`).
+- Provision `Assets.zip` and `Server/` out-of-band (for example with an init container) and run with `HYTALE_AUTO_DOWNLOAD=false`.
+
 If you want fully non-interactive automation, see: [Non-interactive auto-download (seed credentials)](#non-interactive-auto-download-seed-credentials)
 
 For safety, `HYTALE_DOWNLOADER_URL` is restricted to `https://downloader.hytale.com/`.
@@ -34,6 +39,19 @@ Current limitation:
 - On `linux/arm64`, you must provide the server files and `Assets.zip` manually.
 
 On arm64 hosts (for example Apple Silicon), you can also run the container as `linux/amd64` (Compose: `platform: linux/amd64`).
+
+## Startup order (important)
+
+The startup sequence is fixed and relevant when combining auto-download and token broker:
+
+1. Validate required files (`/data/Assets.zip`, `/data/server/HytaleServer.jar`) and run auto-download/update if enabled.
+2. Install/update CurseForge mods (if configured).
+3. Run pre-start universe/mod downloads (if configured).
+4. Apply `CFG_*` interpolation.
+5. Run Session Token Broker (if enabled and tokens are not already set).
+6. Start the Java server process.
+
+This means: if an earlier step fails or blocks (for example downloader auth on first run), the Session Token Broker step is not reached yet.
 
 ## Server authentication (required for player connections)
 

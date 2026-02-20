@@ -39,6 +39,9 @@ Open the URL in your browser and enter the device code. After completion, the do
 
 On subsequent runs, this step is skipped (credentials are stored on the `/data` volume).
 
+> [!TIP]
+> For non-interactive setups, seed credentials via `HYTALE_DOWNLOADER_CREDENTIALS_SRC` (mounted secret), or pre-provision `Assets.zip` and `Server/` and set `HYTALE_AUTO_DOWNLOAD=false`.
+
 > [!NOTE]
 > **Apple Silicon (arm64):** The official downloader only supports `linux/amd64`.
 > Add `platform: linux/amd64` to your Compose file (uses emulation), or provision files manually: [`server-files.md`](server-files.md)

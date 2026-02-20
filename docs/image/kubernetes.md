@@ -27,6 +27,15 @@ If you enable auto-download (`HYTALE_AUTO_DOWNLOAD=true`), the server files can 
 
 Note: We intentionally do not enable a read-only root filesystem by default. The official server workflow can require writing a machine-id (and while the image has workarounds, a strictly read-only root filesystem can still be surprising operationally).
 
+### Recommended production patterns for server files
+
+For non-interactive Kubernetes operations, prefer one of these:
+
+- Keep `HYTALE_AUTO_DOWNLOAD=true` and mount a downloader credentials secret as `HYTALE_DOWNLOADER_CREDENTIALS_SRC`.
+- Set `HYTALE_AUTO_DOWNLOAD=false` and provision `/data/Assets.zip` + `/data/server/` before container startup (for example with an init container).
+
+Why this matters: Session Token Broker runs later in startup. If auto-download is still waiting for first-time auth (or fails), broker logs/calls are not reached yet.
+
 ## Helm
 
 The Helm chart lives in `deploy/helm/hytale-server`.

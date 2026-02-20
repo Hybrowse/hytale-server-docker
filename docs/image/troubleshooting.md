@@ -65,6 +65,24 @@ docker compose logs -f hytale
 > [!NOTE]
 > On Apple Silicon (arm64), auto-download requires running the container as `linux/amd64`.
 
+## Session Token Broker enabled, but no broker logs
+
+**Symptom:** `HYTALE_SESSION_TOKEN_BROKER_ENABLED=true` is set, but startup logs show no broker activity.
+
+**Cause:** The broker step runs later in startup. If an earlier phase fails or blocks, broker logs will not appear yet.
+Common examples:
+
+- Auto-download/update is still waiting on first-time downloader device auth.
+- Auto-download failed before startup reached the broker step.
+- Both `HYTALE_SERVER_SESSION_TOKEN` and `HYTALE_SERVER_IDENTITY_TOKEN` are already set (broker is skipped by design).
+
+**Fix:**
+
+- Check full container logs from startup (`docker compose logs -f hytale`), not only interactive attach output.
+- For non-interactive startup, either:
+  - seed `/data/.hytale-downloader-credentials.json` via `HYTALE_DOWNLOADER_CREDENTIALS_SRC`, or
+  - pre-provision `/data/Assets.zip` and `/data/server/HytaleServer.jar` and set `HYTALE_AUTO_DOWNLOAD=false`.
+
 ## Auto-download fails on arm64 (Apple Silicon)
 
 **Symptom:**
