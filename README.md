@@ -50,7 +50,9 @@ docker compose up -d
 > **Two authentication steps required:**
 >
 > 1. **Downloader auth** (first run): follow the URL + device code in the logs to download server files
-> 2. **Server auth** (after startup): attach to the console (`docker compose attach hytale`), then run `/auth persistence Encrypted` followed by `/auth login device`
+> 2. **Server auth** (first startup): follow the second URL + device code in the logs. The image starts Hytale's device login and encrypted credential storage automatically.
+>
+> If your account has several profiles, choose one from the log with `docker compose exec hytale hytale-cli auth select <name-or-number>`. The login and profile are reused on later starts. Set `HYTALE_AUTO_AUTH=false` to manage login yourself.
 >
 > Optional (advanced / providers): if you run **the [Hytale Session Token Broker](https://github.com/Hybrowse/hytale-session-token-broker) by Hybrowse**, you can fetch session/identity tokens at container startup and skip the interactive `/auth` flow. See: [`docs/image/configuration.md`](docs/image/configuration.md)
 

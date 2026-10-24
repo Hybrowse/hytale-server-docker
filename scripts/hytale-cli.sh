@@ -6,6 +6,9 @@ usage() {
 Usage:
   hytale-cli send <command...>
   hytale-cli send            # read commands from stdin, one per line
+  hytale-cli auth login      # start a persistent device login
+  hytale-cli auth select <name-or-number>
+  hytale-cli auth status
 
 Examples:
   hytale-cli send "/auth status"
@@ -52,6 +55,29 @@ cmd="${1:-}"
 shift || true
 
 case "${cmd}" in
+  auth)
+    action="${1:-status}"
+    case "${action}" in
+      login)
+        [ "$#" -le 1 ] || { usage; exit 1; }
+        write_to_console '/auth persistence Encrypted'
+        write_to_console '/auth login device'
+        echo 'Follow the device login URL in the server logs.' >&2
+        ;;
+      status)
+        [ "$#" -le 1 ] || { usage; exit 1; }
+        write_to_console '/auth status'
+        ;;
+      select)
+        [ "$#" -eq 2 ] || { usage; exit 1; }
+        case "$2" in
+          ''|*[!a-zA-Z0-9_]*) echo 'ERROR: Profile must be a name or number from the Hytale profile list.' >&2; exit 1 ;;
+        esac
+        write_to_console "/auth select $2"
+        ;;
+      *) usage; exit 1 ;;
+    esac
+    ;;
   send)
     if [ "$#" -gt 0 ]; then
       write_to_console "$*"

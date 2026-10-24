@@ -18,6 +18,14 @@ Common issues and how to fix them.
 
 **Fix:**
 
+For a fresh server, first check the logs for the automatically started device login. To start a new login with encrypted persistence:
+
+```bash
+docker compose exec hytale hytale-cli auth login
+```
+
+If several profiles are offered, use `hytale-cli auth select <name-or-number>`. For manual console access:
+
 1. Attach to the server console:
 
 ```bash

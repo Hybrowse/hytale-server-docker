@@ -43,6 +43,7 @@ COPY scripts/curseforge-mods.sh /usr/local/bin/hytale-curseforge-mods
 COPY scripts/prestart-downloads.sh /usr/local/bin/hytale-prestart-downloads
 COPY scripts/session-token-broker.sh /usr/local/bin/hytale-session-token-broker
 COPY scripts/hytale-cli.sh /usr/local/bin/hytale-cli
+COPY --chmod=755 scripts/first-start.sh /usr/local/bin/hytale-first-start
 COPY scripts/healthcheck.sh /usr/local/bin/hytale-healthcheck
 RUN chmod 0755 /usr/local/bin/hytale-entrypoint /usr/local/bin/hytale-cfg-interpolate /usr/local/bin/hytale-config-patch /usr/local/bin/hytale-auto-download /usr/local/bin/hytale-curseforge-mods /usr/local/bin/hytale-prestart-downloads /usr/local/bin/hytale-session-token-broker /usr/local/bin/hytale-cli /usr/local/bin/hytale-healthcheck
 

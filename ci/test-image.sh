@@ -605,3 +605,5 @@ rm -rf "${workdir}"
 pass "all tests"
 
 sh "$(dirname "$0")/test-server-options.sh"
+
+sh "$(dirname "$0")/test-first-start-image.sh"

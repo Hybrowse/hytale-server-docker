@@ -71,8 +71,15 @@ This means: if an earlier step fails or blocks (for example downloader auth on f
 In `HYTALE_AUTH_MODE=authenticated` mode, the server must be authenticated after startup before players can connect.
 This is separate from the downloader OAuth flow used for auto-download.
 
-To persist authentication across server restarts, run `/auth persistence Encrypted` before `/auth login device`.
-Without this, you will need to re-authenticate after every container restart.
+On a fresh server, `HYTALE_AUTO_AUTH=true` (default) queues Hytale's own
+`/auth persistence Encrypted` and `/auth login device` commands. Follow the device
+login link in the logs. If several profiles are offered, run
+`hytale-cli auth select <name-or-number>` and check the result in the server logs.
+
+Stored credentials and broker/supplied tokens bypass this first-start action.
+Set `HYTALE_AUTO_AUTH=false` for manual login. Automatic login requires
+`HYTALE_CONSOLE_PIPE=true`; validation, schema export, help and offline runs skip it.
+`hytale-cli auth login` starts another persistent device login when needed.
 
 See:
 
@@ -384,6 +391,7 @@ In JSON:
 | `HYTALE_AOT_PATH` | `/data/server/HytaleServer.aot` | Path to the AOT cache file. |
 | `HYTALE_BIND` | `0.0.0.0:5520` | Bind address for QUIC/UDP. |
 | `HYTALE_AUTH_MODE` | `authenticated` | Authentication mode (`authenticated`, `offline`, or `insecure`). |
+| `HYTALE_AUTO_AUTH` | `true` | Start persistent device login on a fresh authenticated server. Existing credentials, broker tokens and non-game modes are skipped. |
 | `HYTALE_DISABLE_SENTRY` | `false` | If `true`, passes `--disable-sentry`. |
 | `HYTALE_ACCEPT_EARLY_PLUGINS` | `false` | If `true`, passes `--accept-early-plugins` (acknowledges unsupported early plugins). |
 | `HYTALE_ENABLE_BACKUP` | `false` | If `true`, passes `--backup`. |
