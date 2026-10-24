@@ -73,3 +73,66 @@ Recommended termination grace period:
 
 Rolling back the image tag is possible, but rolling back server files and world state may not be safe.
 If you need reliable rollbacks, use snapshots/backups of `/data` and restore those in addition to changing the image tag.
+
+
+## In-game server updates
+
+Opt in with:
+
+```yaml
+environment:
+  HYTALE_NATIVE_UPDATES: "true"
+  HYTALE_AUTO_UPDATE: "false"
+  HYTALE_ENABLE_BACKUP: "true"
+```
+
+Remove `HYTALE_DISABLE_UPDATES=true` if previously set. `HYTALE_AUTO_DOWNLOAD=true`
+can still provision missing files on first startup, but its startup update check
+must be disabled so that two mechanisms do not update the same installation.
+
+Send the normal Hytale update commands, checking the server logs between steps:
+
+```bash
+docker compose exec hytale hytale-cli send "/update check"
+docker compose exec hytale hytale-cli send "/update download"
+# Wait for the download to finish, then:
+docker compose exec hytale hytale-cli send "/update apply --confirm"
+```
+
+Hytale performs its configured pre-update backups, shuts down with exit code 8,
+and the image then verifies and installs the staged files before restarting Java.
+A staged update is also applied at the next container start, matching the official
+launcher workflow. A crash or a regular shutdown does not trigger an internal restart.
+An update exit without staged files fails with a clear error instead of looping.
+
+Use the standard `/data/server/HytaleServer.jar`, `/data/Assets.zip` and AOT paths.
+The files and their directories must be writable; mount the `/data` volume rather
+than individual read-only JAR/assets files. Only one update runner can hold the
+volume lock at a time. No root privileges are required.
+
+### What is replaced
+
+Only the JAR, optional `Assets.zip`, AOT input configuration and license directory
+are installed. Staged launcher scripts, configuration, mods and authentication
+files are not executed or installed. World data and credentials stay in place.
+The existing AOT cache is removed because it may not match the new server. Use
+`ENABLE_AOT=auto` or `false` for unattended updates; strict mode needs a matching
+cache to be generated again before the next start.
+
+The image checks archive integrity and rejects staged links or special files.
+It prepares the replacement files and records the previous binaries before
+changing live files. A failed install restores the previous files. An interrupted
+transaction is recovered before Java can start. Keep enough free disk space for
+the staged package, prepared replacements and backups.
+
+Previous binaries are retained at `/data/updater/image-backup/previous/`:
+`jar`, `assets`, `aotconfig`, `aot` and `licenses` correspond to their managed paths.
+Hytale's own `/data/updater/backup` is separate and is left untouched.
+Once the new server has started, the image does not roll it back automatically:
+world or config migrations may already have happened. A version rollback should
+include a compatible world/config snapshot, as described above.
+
+If validation fails, the live files stay unchanged. Inspect the log and staged
+package, cancel the incomplete update with Hytale's `/update cancel` while native
+update mode is disabled if necessary, then download it again. Do not delete
+`image-transaction` while recovering an interrupted install.

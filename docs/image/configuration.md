@@ -404,6 +404,7 @@ In JSON:
 | `HYTALE_SESSION_TOKEN_BROKER_MIN_RETRY_INTERVAL_SECONDS` | *(empty)* | If set: minimum time between successful broker token fetches. Prevents token minting spam on restart loops by waiting before minting again. |
 | `HYTALE_AUTO_DOWNLOAD` | `false` | If `true`, downloads server files and `Assets.zip` via the official Hytale Downloader when missing. |
 | `HYTALE_AUTO_UPDATE` | `true` | If `true`, checks for updates on each start (compares remote version vs local). Only downloads when an update is available. |
+| `HYTALE_NATIVE_UPDATES` | `false` | Apply Hytale-staged updates after exit code 8 and restart Java. Requires writable standard server paths and `HYTALE_AUTO_UPDATE=false` when auto-download is enabled. |
 | `HYTALE_CONSOLE_PIPE` | `true` | If `true`, enables the console command pipe used by `hytale-cli`. If `false`, the server uses normal stdin and `hytale-cli` is disabled. |
 | `HYTALE_CONSOLE_FIFO` | `/tmp/hytale-console.fifo` | Path to the console FIFO inside the container (only used when `HYTALE_CONSOLE_PIPE=true`). |
 | `HYTALE_VERSION_FILE` | `/data/.hytale-version` | File where the installed server version is stored (used for update checks). |
@@ -644,8 +645,9 @@ Docker passes these directly to Hytale; no `EXTRA_SERVER_ARGS` mapping is needed
 The key variables apply to Hytale's own encrypted credential store, not to the
 broker's storage or the downloader credentials. Both are already separate flows.
 When managing updates through the image/downloader, set `HYTALE_DISABLE_UPDATES=true`.
-The official in-game `/update apply` flow needs its own wrapper to apply staged
-files after exit code 8; this image starts Java directly and does not implement that wrapper.
+To use Hytale's own `/update download` and `/update apply --confirm` flow, set
+`HYTALE_NATIVE_UPDATES=true` and `HYTALE_AUTO_UPDATE=false`; do not set
+`HYTALE_DISABLE_UPDATES=true`. See [`upgrades.md`](upgrades.md#in-game-server-updates).
 
 The server also reads `HYTALE_SERVER_OFFLINE_TOKEN` and `HYTALE_SERVER_AUDIENCE`.
 These are advanced authentication inputs, not replacements for the documented
