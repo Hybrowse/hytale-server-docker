@@ -223,22 +223,20 @@ echo "${out}" | grep -q "Starting Hytale dedicated server" || fail "expected ser
 pass "auto-update can be disabled"
 rm -rf "${workdir2c}"
 
-# Test 5: auto-download must fail fast on arm64 without attempting network calls
-# Use HYTALE_TEST_ARCH to simulate arm64 on any runner.
+# Test 5: unsupported architectures fail before attempting network calls.
 workdir3="$(mktemp -d)"
 chmod 0777 "${workdir3}"
 set +e
 out="$(docker run --rm \
   --entrypoint /usr/local/bin/hytale-auto-download \
-  -e HYTALE_TEST_ARCH=aarch64 \
+  -e HYTALE_TEST_ARCH=riscv64 \
   -v "${workdir3}:/data" \
   "${IMAGE_NAME}" 2>&1)"
 status=$?
 set -e
-[ ${status} -ne 0 ] || fail "expected non-zero exit status when auto-download is forced to arm64"
-echo "${out}" | grep -q "Auto-download is not supported on arm64" || fail "expected arm64 unsupported error"
-echo "${out}" | grep -q "provide server files and Assets.zip manually" || fail "expected manual provisioning hint on arm64"
-pass "auto-download fails fast on arm64"
+[ ${status} -ne 0 ] || fail "expected non-zero exit status when auto-download is forced to an unsupported architecture"
+echo "${out}" | grep -q "Unsupported architecture" || fail "expected unsupported architecture error"
+pass "unsupported downloader architecture fails before network access"
 rm -rf "${workdir3}"
 
 # Test 6: stale auto-download lock must be removed automatically

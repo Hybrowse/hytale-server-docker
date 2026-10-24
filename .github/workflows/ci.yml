@@ -11,7 +11,7 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Test downloader login recovery
-        run: sh ci/test-downloader.sh
+        run: sh ci/test-downloader-architectures.sh
 
       - name: Build image
         run: |
@@ -28,6 +28,27 @@ jobs:
           ./ci/test-k8s-manifests.sh
 
       - name: Check image OS vulnerabilities
+        uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
+        with:
+          image-ref: hytale-server:test
+          version: v0.76.1
+          scanners: vuln
+          vuln-type: os
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: '1'
+
+  arm64-image-tests:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v7
+      - name: Build native ARM64 image
+        run: docker build -t hytale-server:test .
+      - name: Run image validation tests
+        run: IMAGE_NAME=hytale-server:test sh ci/test-image.sh
+      - name: Run official downloader without authentication
+        run: IMAGE_NAME=hytale-server:test sh ci/test-downloader-smoke.sh
+      - name: Check ARM64 image OS vulnerabilities
         uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
         with:
           image-ref: hytale-server:test

@@ -124,24 +124,44 @@ esac
 
 ZIP_PATH="${HYTALE_DOWNLOADER_DIR}/hytale-downloader.zip"
 arch="${HYTALE_TEST_ARCH:-$(uname -m)}"
+# The official downloader is x86-64. Only this helper is emulated on ARM64;
+# the server JVM continues to use the native architecture.
+bin_name="hytale-downloader-linux-amd64"
+use_qemu=0
 case "${arch}" in
-  x86_64|amd64)
-    bin_name="hytale-downloader-linux-amd64"
-    ;;
+  x86_64|amd64) ;;
   aarch64|arm64)
-    log "ERROR: Auto-download is not supported on arm64 because the official downloader archive does not include a linux-arm64 binary."
-    log "ERROR: Please provide server files and Assets.zip manually on arm64, or run this container as linux/amd64 (Docker Compose: platform: linux/amd64)."
-    log "ERROR: See https://github.com/Hybrowse/hytale-server-docker/blob/main/docs/image/quickstart.md"
-    log "ERROR: See https://github.com/Hybrowse/hytale-server-docker/blob/main/docs/image/server-files.md"
-    exit 1
+    if ! command -v qemu-x86_64-static >/dev/null 2>&1; then
+      log "ERROR: ARM64 auto-download requires qemu-x86_64-static in the image."
+      exit 1
+    fi
+    use_qemu=1
+    log "Auto-download: using x86-64 emulation for the downloader; Java stays native"
     ;;
   *)
     log "ERROR: Unsupported architecture for downloader in container: ${arch}"
-    log "ERROR: Please provide server files and Assets.zip manually."
-    log "ERROR: See https://github.com/Hybrowse/hytale-server-docker/blob/main/docs/image/server-files.md"
     exit 1
     ;;
 esac
+
+run_downloader() {
+  if [ "${use_qemu}" -eq 1 ]; then
+    qemu-x86_64-static "${DOWNLOADER_BIN}" "$@"
+  else
+    "${DOWNLOADER_BIN}" "$@"
+  fi
+}
+
+print_game_version() {
+  set -- -print-version
+  if [ -n "${HYTALE_DOWNLOADER_PATCHLINE}" ]; then
+    set -- "$@" -patchline "${HYTALE_DOWNLOADER_PATCHLINE}"
+  fi
+  if is_true "${HYTALE_DOWNLOADER_SKIP_UPDATE_CHECK}"; then
+    set -- "$@" -skip-update-check
+  fi
+  run_downloader "$@"
+}
 
 DOWNLOADER_BIN="${HYTALE_DOWNLOADER_DIR}/hytale-downloader"
 
@@ -196,14 +216,7 @@ if [ "${server_files_present}" -eq 1 ]; then
   else
     log "Auto-download: checking remote version"
     remote_version=""
-    print_version_args="${DOWNLOADER_BIN} -print-version"
-    if [ -n "${HYTALE_DOWNLOADER_PATCHLINE}" ]; then
-      print_version_args="${print_version_args} -patchline ${HYTALE_DOWNLOADER_PATCHLINE}"
-    fi
-    if is_true "${HYTALE_DOWNLOADER_SKIP_UPDATE_CHECK}"; then
-      print_version_args="${print_version_args} -skip-update-check"
-    fi
-    remote_version="$(${print_version_args} 2>&1 || true)"
+    remote_version="$(print_game_version 2>&1 || true)"
 
     if [ -n "${remote_version}" ] && ! printf '%s' "${remote_version}" | grep -qi -e "error" -e "failed" -e "authenticate"; then
       local_version=""
@@ -224,7 +237,7 @@ fi
 
 log "Auto-download: running downloader"
 
-set -- "${DOWNLOADER_BIN}" -download-path "${HYTALE_GAME_ZIP_PATH}"
+set -- -download-path "${HYTALE_GAME_ZIP_PATH}"
 
 if [ -n "${HYTALE_DOWNLOADER_PATCHLINE}" ]; then
   set -- "$@" -patchline "${HYTALE_DOWNLOADER_PATCHLINE}"
@@ -234,7 +247,7 @@ if is_true "${HYTALE_DOWNLOADER_SKIP_UPDATE_CHECK}"; then
   set -- "$@" -skip-update-check
 fi
 
-if "$@"; then
+if run_downloader "$@"; then
   :
 else
   status=$?
@@ -293,14 +306,7 @@ if ! is_true "${HYTALE_KEEP_GAME_ZIP}"; then
 fi
 
 downloaded_version=""
-print_version_args="${DOWNLOADER_BIN} -print-version"
-if [ -n "${HYTALE_DOWNLOADER_PATCHLINE}" ]; then
-  print_version_args="${print_version_args} -patchline ${HYTALE_DOWNLOADER_PATCHLINE}"
-fi
-if is_true "${HYTALE_DOWNLOADER_SKIP_UPDATE_CHECK}"; then
-  print_version_args="${print_version_args} -skip-update-check"
-fi
-downloaded_version="$(${print_version_args} 2>/dev/null || true)"
+downloaded_version="$(print_game_version 2>/dev/null || true)"
 if [ -n "${downloaded_version}" ]; then
   printf '%s\n' "${downloaded_version}" >"${HYTALE_VERSION_FILE}"
   log "Auto-download: saved version ${downloaded_version} to ${HYTALE_VERSION_FILE}"
