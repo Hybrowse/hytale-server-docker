@@ -271,6 +271,31 @@ if echo "${out}" | grep -q "${TOKEN_VALUE}"; then
 fi
 pass "token values are not logged"
 
+# Check the Java process boundary without printing either token.
+java_probe="$(mktemp -d)"
+chmod 0755 "${java_probe}"
+cat > "${java_probe}/java" <<'JAVA_PROBE'
+#!/bin/sh
+for arg do
+  case "$arg" in
+    *super-secret-token*|--session-token|--identity-token) exit 41 ;;
+  esac
+done
+[ "${HYTALE_SERVER_SESSION_TOKEN:-}" = "super-secret-token" ] || exit 42
+[ "${HYTALE_SERVER_IDENTITY_TOKEN:-}" = "super-secret-token" ] || exit 43
+echo "Token environment preserved; arguments contain no credentials"
+JAVA_PROBE
+chmod 0755 "${java_probe}/java"
+out="$(docker run --rm \
+  -e HYTALE_SERVER_SESSION_TOKEN="${TOKEN_VALUE}" \
+  -e HYTALE_SERVER_IDENTITY_TOKEN="${TOKEN_VALUE}" \
+  -e ENABLE_AOT=false \
+  -v "${java_probe}/java:/opt/java/openjdk/bin/java:ro" \
+  -v "${workdir}:/data" "${IMAGE_NAME}" 2>&1)" || fail "token process-boundary check failed"
+rm -rf "${java_probe}"
+echo "${out}" | grep -q "Token environment preserved" || fail "Java probe did not run"
+pass "tokens reach Java through the environment without appearing in arguments"
+
 workdir_cf="$(mktemp -d)"
 chmod 0777 "${workdir_cf}"
 cf_net="cf-mock-$$"

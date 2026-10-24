@@ -524,12 +524,14 @@ if [ -n "${user_args}" ]; then
   set -- "$@" ${user_args}
 fi
 
+# Hytale accepts these environment variables directly. Keep credentials out of
+# the process arguments, where process listings can expose them.
 if [ -n "${HYTALE_SERVER_SESSION_TOKEN:-}" ]; then
-  set -- "$@" --session-token "${HYTALE_SERVER_SESSION_TOKEN}"
+  export HYTALE_SERVER_SESSION_TOKEN
 fi
 
 if [ -n "${HYTALE_SERVER_IDENTITY_TOKEN:-}" ]; then
-  set -- "$@" --identity-token "${HYTALE_SERVER_IDENTITY_TOKEN}"
+  export HYTALE_SERVER_IDENTITY_TOKEN
 fi
 
 if is_true "${HYTALE_CONSOLE_PIPE}"; then

@@ -82,7 +82,7 @@ The reference broker implementation by Hybrowse lives here: [Hytale Session Toke
 Operational model (mental model):
 
 - The broker persists long-lived OAuth state (refresh token) and mints short-lived game session tokens on demand.
-- This image only sees the short-lived `HYTALE_SERVER_SESSION_TOKEN` / `HYTALE_SERVER_IDENTITY_TOKEN` at startup and passes them to the Java process.
+- This image only sees the short-lived `HYTALE_SERVER_SESSION_TOKEN` / `HYTALE_SERVER_IDENTITY_TOKEN` at startup and passes them to the Java process through its environment, keeping them out of process arguments.
 
 Security notes:
 
@@ -379,8 +379,8 @@ In JSON:
 | `HYTALE_BACKUP_FREQUENCY_MINUTES` | `30` | Passed as `--backup-frequency`. |
 | `HYTALE_BACKUP_ARCHIVE_MAX_COUNT` | *(empty)* | Passed as `--backup-archive-max-count`. |
 | `HYTALE_BACKUP_MAX_COUNT` | `5` | Passed as `--backup-max-count`. |
-| `HYTALE_SERVER_SESSION_TOKEN` | *(empty)* | Passed as `--session-token` (**secret**). |
-| `HYTALE_SERVER_IDENTITY_TOKEN` | *(empty)* | Passed as `--identity-token` (**secret**). |
+| `HYTALE_SERVER_SESSION_TOKEN` | *(empty)* | Read by Hytale from the environment (**secret**). |
+| `HYTALE_SERVER_IDENTITY_TOKEN` | *(empty)* | Read by Hytale from the environment (**secret**). |
 | `HYTALE_SESSION_TOKEN_BROKER_ENABLED` | `false` | If `true`, fetches server session/identity tokens from the Session Token Broker before starting the server. |
 | `HYTALE_SESSION_TOKEN_BROKER_URL` | *(empty)* | Base URL for the broker (e.g. `http://broker:8080`). |
 | `HYTALE_SESSION_TOKEN_BROKER_BEARER_TOKEN` | *(empty)* | Optional HTTP bearer token for the broker API (**secret**). |
