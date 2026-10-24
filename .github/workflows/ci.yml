@@ -30,6 +30,12 @@ jobs:
           chmod +x ci/test-k8s-manifests.sh
           ./ci/test-k8s-manifests.sh
 
+      - name: Test native update application and recovery
+        run: IMAGE_NAME=hytale-server:test sh ci/test-native-updates.sh
+
+      - name: Test update restart and graceful shutdown
+        run: IMAGE_NAME=hytale-server:test sh ci/test-update-runner.sh
+
       - name: Check image OS vulnerabilities
         uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
         with:

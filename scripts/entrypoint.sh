@@ -16,6 +16,10 @@ log() {
   printf '%s\n' "$*" >&2
 }
 
+if is_true "${HYTALE_NATIVE_UPDATES:-false}" && ! is_true "${_HYTALE_UPDATE_CHILD:-false}"; then
+  exec /usr/local/bin/hytale-update-runner "$@"
+fi
+
 DATA_DIR="/data"
 SERVER_DIR="/data/server"
 
