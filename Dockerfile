@@ -1,7 +1,7 @@
 FROM eclipse-temurin:25-jre-noble@sha256:3f2223fe04b750aa5a8179e29b5c9a1ddf7665fc9bb08bfe11ad01d143bc13a5
 
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends tini ca-certificates curl unzip jq zlib1g util-linux \
+  && apt-get install -y --no-install-recommends tini ca-certificates curl unzip jq zlib1g \
   && rm -rf /var/lib/apt/lists/*
 
 # The October security release is available before the official Docker images.
@@ -47,6 +47,8 @@ COPY scripts/session-token-broker.sh /usr/local/bin/hytale-session-token-broker
 COPY scripts/hytale-cli.sh /usr/local/bin/hytale-cli
 COPY scripts/healthcheck.sh /usr/local/bin/hytale-healthcheck
 RUN chmod 0755 /usr/local/bin/hytale-apply-update /usr/local/bin/hytale-update-runner /usr/local/bin/hytale-entrypoint /usr/local/bin/hytale-cfg-interpolate /usr/local/bin/hytale-config-patch /usr/local/bin/hytale-auto-download /usr/local/bin/hytale-curseforge-mods /usr/local/bin/hytale-prestart-downloads /usr/local/bin/hytale-session-token-broker /usr/local/bin/hytale-cli /usr/local/bin/hytale-healthcheck
+
+RUN command -v flock >/dev/null
 
 RUN mkdir -p /usr/share/hytale
 COPY defaults/server-config.json /usr/share/hytale/default-config.json
