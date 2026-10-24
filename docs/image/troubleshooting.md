@@ -71,7 +71,7 @@ docker compose logs -f hytale
 ```
 
 > [!NOTE]
-> On Apple Silicon (arm64), auto-download requires running the container as `linux/amd64`.
+> ARM64 images include emulation for the official downloader. Java and the game server remain native; no `platform: linux/amd64` override is needed.
 
 ## Expired downloader login (`invalid_grant`)
 
@@ -120,27 +120,25 @@ Common examples:
   - seed `/data/.hytale-downloader-credentials.json` via `HYTALE_DOWNLOADER_CREDENTIALS_SRC`, or
   - pre-provision `/data/Assets.zip` and `/data/server/HytaleServer.jar` and set `HYTALE_AUTO_DOWNLOAD=false`.
 
-## Auto-download fails on arm64 (Apple Silicon)
+## Auto-download on ARM64 (Apple Silicon)
 
-**Symptom:**
+Current ARM64 images run the official x86-64 downloader through a bundled emulator.
+Java and the game server run natively. No privileged mode or host emulation setup
+is required.
 
-```text
-ERROR: Auto-download is not supported on arm64 because the official downloader archive does not include a linux-arm64 binary.
+If you see the old error `Auto-download is not supported on arm64`, update the
+image and recreate the container:
+
+```bash
+docker compose pull hytale
+docker compose up -d hytale
 ```
 
-**Cause:** The official Hytale Downloader currently only provides a `linux/amd64` binary.
+Remove any `platform: linux/amd64` override from your Compose service to use the
+native ARM64 image. Keep the existing `/data` volume so downloaded files, worlds
+and credentials are preserved. Follow any downloader login prompt in the logs.
 
-**Fix:** Either:
-
-- Run the container as `linux/amd64` (uses emulation):
-
-  ```yaml
-  services:
-    hytale:
-      platform: linux/amd64
-  ```
-
-- Or provision server files manually: [`server-files.md`](server-files.md)
+Manual provisioning remains available: [`server-files.md`](server-files.md).
 
 ## Permission denied errors on `/data`
 

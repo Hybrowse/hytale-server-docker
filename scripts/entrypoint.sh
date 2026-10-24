@@ -190,7 +190,7 @@ setup_machine_id() {
 setup_machine_id
 
 log "Thank you for using the Hytale Server Docker Image by Hybrowse!"
-log "- Add your server to our server list: https://hybrowse.gg"
+log "- Discord: https://hybrowse.gg/discord"
 log "- GitHub: https://github.com/Hybrowse/hytale-server-docker"
 log "- Console: 'docker compose attach hytale' (detach: Ctrl-p then Ctrl-q)"
 log ""

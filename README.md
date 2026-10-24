@@ -14,7 +14,7 @@ This image is part of the **Hybrowse Server Stack** — production-grade buildin
 - **Non-interactive server authentication** via [Hybrowse/hytale-session-token-broker](https://github.com/Hybrowse/hytale-session-token-broker) (mints short-lived `session_token` / `identity_token` at startup to skip the interactive `/auth` flow)
 - **Stateless QUIC entrypoint + referral routing** via [Hybrowse/hyrouter](https://github.com/Hybrowse/hyrouter)
 
-Brought to you by [Hybrowse](https://hybrowse.gg) and the developer of [setupmc.com](https://setupmc.com).
+Brought to you by [Hybrowse](https://github.com/Hybrowse) and the developer of [setupmc.com](https://setupmc.com).
 
 ## Image
 
