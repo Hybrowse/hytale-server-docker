@@ -42,10 +42,11 @@ cmp /fixture/new-assets.zip "${DATA_DIR}/Assets.zip"
 cmp /fixture/old.jar "${DATA_DIR}/updater/image-backup/previous/jar"
 cmp /fixture/old-assets.zip "${DATA_DIR}/updater/image-backup/previous/assets"
 
-for invalid in missing-jar corrupt-jar corrupt-assets link special; do
+for invalid in missing-jar missing-assets corrupt-jar corrupt-assets link special; do
   reset_data
   case "$invalid" in
     missing-jar) rm "${DATA_DIR}/updater/staging/Server/HytaleServer.jar" ;;
+    missing-assets) rm "${DATA_DIR}/updater/staging/Assets.zip" ;;
     corrupt-jar) echo broken > "${DATA_DIR}/updater/staging/Server/HytaleServer.jar" ;;
     corrupt-assets) echo broken > "${DATA_DIR}/updater/staging/Assets.zip" ;;
     link) ln -s "${DATA_DIR}/server/auth.enc" "${DATA_DIR}/updater/staging/Server/link" ;;

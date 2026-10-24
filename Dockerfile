@@ -1,7 +1,7 @@
 FROM eclipse-temurin:25-jre-noble@sha256:3f2223fe04b750aa5a8179e29b5c9a1ddf7665fc9bb08bfe11ad01d143bc13a5
 
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends tini ca-certificates curl unzip jq zlib1g \
+  && apt-get install -y --no-install-recommends tini ca-certificates curl unzip jq zlib1g util-linux \
   && rm -rf /var/lib/apt/lists/*
 
 # The October security release is available before the official Docker images.

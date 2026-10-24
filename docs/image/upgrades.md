@@ -112,8 +112,9 @@ volume lock at a time. No root privileges are required.
 
 ### What is replaced
 
-Only the JAR, optional `Assets.zip`, AOT input configuration and license directory
-are installed. Staged launcher scripts, configuration, mods and authentication
+A complete staged package must contain both the JAR and `Assets.zip`; partial
+or JAR-only packages are rejected. Only those files, optional AOT input configuration
+and the license directory are installed. Staged launcher scripts, configuration, mods and authentication
 files are not executed or installed. World data and credentials stay in place.
 The existing AOT cache is removed because it may not match the new server. Use
 `ENABLE_AOT=auto` or `false` for unattended updates; strict mode needs a matching

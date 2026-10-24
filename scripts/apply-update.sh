@@ -83,10 +83,9 @@ fi
 [ -s "${staging}/Server/HytaleServer.jar" ] || fail 'Staged update has no non-empty Server/HytaleServer.jar; cancel and download it again'
 log 'Checking the staged server archive'
 unzip -tq "${staging}/Server/HytaleServer.jar" >/dev/null 2>&1 || fail 'Staged server JAR is corrupt; cancel and download it again'
-if [ -e "${staging}/Assets.zip" ]; then
-  log 'Checking the staged assets archive'
-  [ -s "${staging}/Assets.zip" ] && unzip -tq "${staging}/Assets.zip" >/dev/null 2>&1 || fail 'Staged Assets.zip is corrupt'
-fi
+[ -s "${staging}/Assets.zip" ] || fail 'Staged update has no non-empty Assets.zip; cancel and download the full package again'
+log 'Checking the staged assets archive'
+unzip -tq "${staging}/Assets.zip" >/dev/null 2>&1 || fail 'Staged Assets.zip is corrupt'
 log 'Preparing the replacement server files'
 mkdir -p "${SERVER_DIR}" "${transaction}/previous" "${transaction}/next"
 chmod 0700 "${transaction}"
