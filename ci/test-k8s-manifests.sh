@@ -14,10 +14,10 @@ ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 CHART_DIR="${ROOT_DIR}/deploy/helm/hytale-server"
 KUSTOMIZE_DIR="${ROOT_DIR}/deploy/kustomize"
 
-HELM_IMAGE="alpine/helm:4.0.5"
-KUSTOMIZE_IMAGE="registry.k8s.io/kustomize/kustomize:v5.8.0"
-KUBECONFORM_IMAGE="ghcr.io/yannh/kubeconform:v0.7.0"
-K8S_VERSION="1.35.0"
+HELM_IMAGE="alpine/helm:4.3.1"
+KUSTOMIZE_IMAGE="registry.k8s.io/kustomize/kustomize:v5.8.3"
+KUBECONFORM_IMAGE="ghcr.io/yannh/kubeconform:v0.8.0"
+K8S_VERSION="1.37.1"
 
 pull_image() {
   image="$1"

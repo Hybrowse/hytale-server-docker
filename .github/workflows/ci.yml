@@ -8,7 +8,7 @@ jobs:
   docker-image-tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Build image
         run: |
@@ -23,3 +23,14 @@ jobs:
         run: |
           chmod +x ci/test-k8s-manifests.sh
           ./ci/test-k8s-manifests.sh
+
+      - name: Check image OS vulnerabilities
+        uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
+        with:
+          image-ref: hytale-server:test
+          version: v0.76.1
+          scanners: vuln
+          vuln-type: os
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: '1'
