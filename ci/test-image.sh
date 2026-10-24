@@ -603,3 +603,5 @@ pass "multiline HYTALE_CURSEFORGE_MODS supports inline comments"
 
 rm -rf "${workdir}"
 pass "all tests"
+
+sh "$(dirname "$0")/test-server-options.sh"

@@ -68,6 +68,11 @@ HYTALE_EARLY_PLUGINS_PATH="${HYTALE_EARLY_PLUGINS_PATH:-}"
 HYTALE_EVENT_DEBUG="${HYTALE_EVENT_DEBUG:-false}"
 HYTALE_FORCE_NETWORK_FLUSH="${HYTALE_FORCE_NETWORK_FLUSH:-}"
 HYTALE_GENERATE_SCHEMA="${HYTALE_GENERATE_SCHEMA:-false}"
+HYTALE_GENERATE_ASSET_SCHEMA_PATH="${HYTALE_GENERATE_ASSET_SCHEMA_PATH:-}"
+HYTALE_GENERATE_CONFIG_SCHEMA_PATH="${HYTALE_GENERATE_CONFIG_SCHEMA_PATH:-}"
+HYTALE_IGNORE_BROKEN_MODS="${HYTALE_IGNORE_BROKEN_MODS:-false}"
+HYTALE_VERIFY_WORLDS="${HYTALE_VERIFY_WORLDS:-false}"
+HYTALE_RECOVERY_MODE="${HYTALE_RECOVERY_MODE:-}"
 HYTALE_LOG="${HYTALE_LOG:-}"
 HYTALE_MIGRATE_WORLDS="${HYTALE_MIGRATE_WORLDS:-}"
 HYTALE_MIGRATIONS="${HYTALE_MIGRATIONS:-}"
@@ -84,6 +89,26 @@ HYTALE_VALIDATE_ASSETS="${HYTALE_VALIDATE_ASSETS:-false}"
 HYTALE_VALIDATE_PREFABS="${HYTALE_VALIDATE_PREFABS:-}"
 HYTALE_VALIDATE_WORLD_GEN="${HYTALE_VALIDATE_WORLD_GEN:-false}"
 HYTALE_WORLD_GEN_PATH="${HYTALE_WORLD_GEN_PATH:-}"
+
+# Removed server flags need an explicit migration rather than a misleading Java error.
+if is_true "${HYTALE_GENERATE_SCHEMA}"; then
+  log "ERROR: Hytale 0.7.4 removed --generate-schema. Set HYTALE_GENERATE_ASSET_SCHEMA_PATH or HYTALE_GENERATE_CONFIG_SCHEMA_PATH to an output directory."
+  exit 1
+fi
+if is_true "${HYTALE_SKIP_MOD_VALIDATION}"; then
+  log "ERROR: Hytale 0.7.4 removed --skip-mod-validation. To attempt startup with broken mods, explicitly set HYTALE_IGNORE_BROKEN_MODS=true instead."
+  exit 1
+fi
+if [ -n "${HYTALE_RECOVERY_MODE}" ]; then
+  if ! is_true "${HYTALE_VERIFY_WORLDS}"; then
+    log "ERROR: HYTALE_RECOVERY_MODE requires HYTALE_VERIFY_WORLDS=true."
+    exit 1
+  fi
+  case "${HYTALE_RECOVERY_MODE}" in
+    FROM_BACKUP_OR_REGENERATE|REGENERATE) ;;
+    *) log "ERROR: HYTALE_RECOVERY_MODE must be FROM_BACKUP_OR_REGENERATE or REGENERATE."; exit 1 ;;
+  esac
+fi
 
 HYTALE_AUTO_DOWNLOAD="${HYTALE_AUTO_DOWNLOAD:-false}"
 HYTALE_AUTO_UPDATE="${HYTALE_AUTO_UPDATE:-true}"
@@ -440,8 +465,20 @@ if [ -n "${HYTALE_FORCE_NETWORK_FLUSH:-}" ]; then
   set -- "$@" --force-network-flush "${HYTALE_FORCE_NETWORK_FLUSH}"
 fi
 
-if is_true "${HYTALE_GENERATE_SCHEMA}"; then
-  set -- "$@" --generate-schema
+if [ -n "${HYTALE_GENERATE_ASSET_SCHEMA_PATH}" ]; then
+  set -- "$@" --generate-asset-schema "${HYTALE_GENERATE_ASSET_SCHEMA_PATH}"
+fi
+if [ -n "${HYTALE_GENERATE_CONFIG_SCHEMA_PATH}" ]; then
+  set -- "$@" --generate-config-schema "${HYTALE_GENERATE_CONFIG_SCHEMA_PATH}"
+fi
+if is_true "${HYTALE_IGNORE_BROKEN_MODS}"; then
+  set -- "$@" --ignore-broken-mods
+fi
+if is_true "${HYTALE_VERIFY_WORLDS}"; then
+  set -- "$@" --verify-worlds
+fi
+if [ -n "${HYTALE_RECOVERY_MODE}" ]; then
+  set -- "$@" --recovery-mode "${HYTALE_RECOVERY_MODE}"
 fi
 
 if [ -n "${HYTALE_LOG:-}" ]; then
@@ -478,10 +515,6 @@ fi
 
 if is_true "${HYTALE_SINGLEPLAYER}"; then
   set -- "$@" --singleplayer
-fi
-
-if is_true "${HYTALE_SKIP_MOD_VALIDATION}"; then
-  set -- "$@" --skip-mod-validation
 fi
 
 if [ -n "${HYTALE_TRANSPORT:-}" ]; then

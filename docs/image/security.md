@@ -18,6 +18,8 @@ Treat these as secrets and avoid placing them in plain text config repositories:
 - `/data/.hytale-downloader-credentials.json`
 - `HYTALE_SERVER_SESSION_TOKEN`
 - `HYTALE_SERVER_IDENTITY_TOKEN`
+- `HYTALE_AUTH_KEY` / the contents of `HYTALE_AUTH_KEY_FILE`
+- `HYTALE_SERVER_OFFLINE_TOKEN`
 - `HYTALE_SESSION_TOKEN_BROKER_BEARER_TOKEN`
 - CurseForge API key (`HYTALE_CURSEFORGE_API_KEY`)
 
