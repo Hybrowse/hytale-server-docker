@@ -586,6 +586,7 @@ if is_true "${HYTALE_CONSOLE_PIPE}"; then
   # keep working while still allowing hytale-cli to inject commands via the FIFO.
   exec 4<&0
   exec 3<> "${CONSOLE_FIFO}"
+  /usr/local/bin/hytale-first-start "$@" >&3
   (
     while IFS= read -r line <&4; do
       printf '%s\n' "${line}" >&3

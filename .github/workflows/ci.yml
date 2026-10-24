@@ -13,6 +13,9 @@ jobs:
       - name: Test downloader login recovery
         run: sh ci/test-downloader.sh
 
+      - name: Test first-start login
+        run: sh ci/test-first-start.sh
+
       - name: Build image
         run: |
           docker build -t hytale-server:test .

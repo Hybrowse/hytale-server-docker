@@ -55,41 +55,40 @@ On subsequent runs, this step is skipped (credentials are stored on the `/data` 
 
 ## 3. Server authentication (required for player connections)
 
-1. Attach to the server console:
+On a fresh authenticated server, the image starts Hytale's own device login and
+selects encrypted credential storage automatically. Follow the URL and code in
+`docker compose logs -f`. With auto-download, the downloader shows its own login
+first; the server login is a separate authorization.
 
-   ```bash
-   docker compose attach hytale
-   ```
+If several profiles are listed, choose one by its displayed name or number:
 
-2. Enable encrypted persistence (so you don't need to re-authenticate after every restart):
+```bash
+docker compose exec hytale hytale-cli auth select ExamplePlayer
+```
 
-   ```text
-   /auth persistence Encrypted
-   ```
+Check the result in the logs, or request status:
 
-3. Run:
+```bash
+docker compose exec hytale hytale-cli auth status
+docker compose logs --tail 50
+```
 
-   ```text
-   /auth login device
-   ```
+Keep `/data`, including `server/auth.enc`, the saved configuration and
+`.machine-id`, so Hytale can reuse the selected profile after a restart.
+If Hytale uses `server/auth.key` or `HYTALE_AUTH_KEY_FILE`, preserve that secret too.
+Do not delete these files to recover a downloader login; that uses separate credentials.
 
-4. Follow the URL + device code shown in the console.
+To start another device login without attaching to the console:
 
-5. If multiple profiles are shown, pick one:
+```bash
+docker compose exec hytale hytale-cli auth login
+```
 
-   ```text
-   /auth select <number>
-   ```
+`HYTALE_AUTO_AUTH=false` keeps the manual flow. Automatic login is also skipped
+for offline mode, supplied server tokens, an enabled broker, an existing
+`server/auth.enc`, and validation/schema/help commands. It requires the default
+`HYTALE_CONSOLE_PIPE=true`; disabling the pipe leaves console login under your control.
 
-6. Check status:
-
-   ```text
-   /auth status
-   ```
-
-Detach without stopping the server: `Ctrl-p` then `Ctrl-q`
-
-See: [`troubleshooting.md`](troubleshooting.md)
 
 ## Done!
 
