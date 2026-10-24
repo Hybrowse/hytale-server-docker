@@ -90,6 +90,13 @@ Remove `HYTALE_DISABLE_UPDATES=true` if previously set. `HYTALE_AUTO_DOWNLOAD=tr
 can still provision missing files on first startup, but its startup update check
 must be disabled so that two mechanisms do not update the same installation.
 
+Hytale needs a direct server OAuth login to check for and download updates.
+Use `/auth persistence Encrypted` and `/auth login device` once, and keep the
+credential store in `/data`. Broker-provided session/identity tokens authenticate
+players but do not provide the OAuth refresh token needed by the built-in updater.
+With broker-only authentication, use the startup downloader for downloads instead.
+The image can still install an already staged package and restart with broker tokens.
+
 Send the normal Hytale update commands, checking the server logs between steps:
 
 ```bash
