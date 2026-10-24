@@ -15,9 +15,11 @@ pass() {
 # Verify the actual runtime rather than the inherited base-image version metadata.
 docker run --rm --entrypoint sh "${IMAGE_NAME}" -c '
   current="$(java -XshowSettings:properties -version 2>&1 | sed -n "s/^[[:space:]]*java.version = //p")"
-  dpkg --compare-versions "${current}" ge 25.0.5
-' || fail "expected Java 25.0.5 or newer"
-pass "Java runtime includes the October 2026 security update"
+  dpkg --compare-versions "${current}" ge 25.0.5 || exit 1
+  zlib_version="$(dpkg-query -W -f="\${Version}" zlib1g)"
+  dpkg --compare-versions "${zlib_version}" ge 1:1.3.dfsg-3.1ubuntu2.3
+' || fail "expected patched Java and zlib versions"
+pass "Java and zlib include the current security updates"
 
 # Test 1: runs as non-root by default
 uid="$(docker run --rm --entrypoint id "${IMAGE_NAME}" -u)"
