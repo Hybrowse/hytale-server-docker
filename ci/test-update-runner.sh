@@ -3,7 +3,16 @@ set -eu
 IMAGE_NAME="${IMAGE_NAME:-hytale-server:test}"
 workdir="$(mktemp -d)"
 name="hytale-update-runner-test-$$"
-cleanup() { docker rm -f "${name}" >/dev/null 2>&1 || true; rm -rf "${workdir}"; }
+clean_container_files() {
+ if [ -d "${workdir}/data/updater" ]; then
+  docker run --rm --entrypoint sh -v "${workdir}/data:/data" "${IMAGE_NAME}" -c 'rm -rf /data/updater' >/dev/null
+ fi
+}
+cleanup() {
+ docker rm -f "${name}" >/dev/null 2>&1 || true
+ clean_container_files || true
+ rm -rf "${workdir}"
+}
 trap cleanup EXIT INT TERM
 chmod 0777 "${workdir}"
 mkdir "${workdir}/fixture"
@@ -39,6 +48,7 @@ esac
 JAVA
 chmod 0755 "${workdir}/java"
 prepare_data() {
+ clean_container_files
  rm -rf "${workdir}/data"
  mkdir -p "${workdir}/data/server"
  chmod 0777 "${workdir}/data" "${workdir}/data/server"
