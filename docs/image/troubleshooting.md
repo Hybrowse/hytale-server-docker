@@ -65,6 +65,35 @@ docker compose logs -f hytale
 > [!NOTE]
 > On Apple Silicon (arm64), auto-download requires running the container as `linux/amd64`.
 
+## Expired downloader login (`invalid_grant`)
+
+If auto-download stops with `oauth2: "invalid_grant"`, the saved downloader login
+has expired or been revoked. This happens before the game server starts, so changing
+`HYTALE_SESSION_TOKEN_BROKER_TIMEOUT_SECONDS` does not help.
+
+For Docker Compose, sign in once using a temporary container:
+
+```bash
+docker compose stop hytale
+docker compose run --rm --no-deps \
+  -e HYTALE_AUTO_DOWNLOAD=true \
+  -e HYTALE_AUTO_UPDATE=true \
+  -e HYTALE_DOWNLOADER_RESET_CREDENTIALS=true \
+  --entrypoint /usr/local/bin/hytale-auto-download hytale
+docker compose up -d hytale
+```
+
+Follow the device-login URL in the temporary container's output. The regular
+container then reuses the new login. Worlds, configuration and server authentication
+are preserved. Keep the same volumes and `platform` as the regular service.
+
+If `HYTALE_DOWNLOADER_CREDENTIALS_SRC` is set, obtain a fresh downloader login and
+replace that mounted file instead. Otherwise the old login would be copied back on
+every start. Resetting and seeding credentials together is rejected.
+
+On other platforms, set `HYTALE_DOWNLOADER_RESET_CREDENTIALS=true` for one startup,
+follow the login in the logs, then remove the setting before restarting again.
+
 ## Session Token Broker enabled, but no broker logs
 
 **Symptom:** `HYTALE_SESSION_TOKEN_BROKER_ENABLED=true` is set, but startup logs show no broker activity.
