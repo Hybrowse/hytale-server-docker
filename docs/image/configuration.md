@@ -3,7 +3,7 @@
 ## Java runtime
 
 The official Hytale server requires Java 25.
-This image uses **Adoptium / Eclipse Temurin 25** (`eclipse-temurin:25-jre`).
+This image uses **Adoptium / Eclipse Temurin 25** (`eclipse-temurin:25-jre-noble`, pinned to a digest).
 
 ## Auto-download (recommended)
 
