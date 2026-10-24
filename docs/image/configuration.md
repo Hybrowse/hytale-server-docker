@@ -29,6 +29,13 @@ Credentials are stored as:
 
 If that file already exists (for example from a previous run), downloads become non-interactive.
 
+To replace an expired or revoked login, set `HYTALE_DOWNLOADER_RESET_CREDENTIALS=true`
+for one startup and complete the device login shown in the logs. Remove the setting
+once signed in: leaving it enabled clears the downloader login on every startup.
+This only resets downloader credentials; server authentication, worlds and configuration
+are preserved. It cannot be combined with `HYTALE_DOWNLOADER_CREDENTIALS_SRC`;
+replace the mounted credentials instead. See [recovery steps](troubleshooting.md#expired-downloader-login-invalid_grant).
+
 For non-interactive operations (providers/fleets), use one of these patterns:
 
 - Seed downloader credentials via `HYTALE_DOWNLOADER_CREDENTIALS_SRC` (recommended if you keep `HYTALE_AUTO_DOWNLOAD=true`).

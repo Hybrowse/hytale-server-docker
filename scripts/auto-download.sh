@@ -41,6 +41,7 @@ HYTALE_GAME_ZIP_PATH="${HYTALE_GAME_ZIP_PATH:-${DATA_DIR}/game.zip}"
 HYTALE_DOWNLOADER_PATCHLINE="${HYTALE_DOWNLOADER_PATCHLINE:-}"
 HYTALE_DOWNLOADER_SKIP_UPDATE_CHECK="${HYTALE_DOWNLOADER_SKIP_UPDATE_CHECK:-false}"
 HYTALE_DOWNLOADER_CREDENTIALS_SRC="${HYTALE_DOWNLOADER_CREDENTIALS_SRC:-}"
+HYTALE_DOWNLOADER_RESET_CREDENTIALS="${HYTALE_DOWNLOADER_RESET_CREDENTIALS:-false}"
 HYTALE_KEEP_GAME_ZIP="${HYTALE_KEEP_GAME_ZIP:-false}"
 HYTALE_DOWNLOAD_LOCK="${HYTALE_DOWNLOAD_LOCK:-true}"
 HYTALE_AUTO_UPDATE="${HYTALE_AUTO_UPDATE:-true}"
@@ -165,6 +166,19 @@ log "Auto-download: first-time auth may require opening a URL and entering a dev
 # Persist downloader credentials on the /data volume by running in DATA_DIR.
 cd "${DATA_DIR}"
 
+CREDENTIALS_FILE="${DATA_DIR}/.hytale-downloader-credentials.json"
+
+if is_true "${HYTALE_DOWNLOADER_RESET_CREDENTIALS}"; then
+  if [ -n "${HYTALE_DOWNLOADER_CREDENTIALS_SRC}" ]; then
+    log "ERROR: Cannot reset downloader credentials while HYTALE_DOWNLOADER_CREDENTIALS_SRC is set."
+    log "ERROR: Replace the mounted credentials with a fresh login, or unset the source before resetting."
+    exit 1
+  fi
+  log "Auto-download: clearing saved downloader credentials; a new device login is required"
+  rm -f "${CREDENTIALS_FILE}"
+  log "Auto-download: remove HYTALE_DOWNLOADER_RESET_CREDENTIALS after this login to keep it on the next restart"
+fi
+
 if [ -n "${HYTALE_DOWNLOADER_CREDENTIALS_SRC}" ]; then
   if [ ! -f "${HYTALE_DOWNLOADER_CREDENTIALS_SRC}" ]; then
     log "ERROR: HYTALE_DOWNLOADER_CREDENTIALS_SRC is set but file does not exist: ${HYTALE_DOWNLOADER_CREDENTIALS_SRC}"
@@ -175,8 +189,6 @@ if [ -n "${HYTALE_DOWNLOADER_CREDENTIALS_SRC}" ]; then
   log "Auto-download: seeding downloader credentials from mounted file"
   cp -f "${HYTALE_DOWNLOADER_CREDENTIALS_SRC}" "${DATA_DIR}/.hytale-downloader-credentials.json"
 fi
-
-CREDENTIALS_FILE="${DATA_DIR}/.hytale-downloader-credentials.json"
 
 if [ "${server_files_present}" -eq 1 ]; then
   if [ ! -f "${CREDENTIALS_FILE}" ]; then
@@ -222,7 +234,21 @@ if is_true "${HYTALE_DOWNLOADER_SKIP_UPDATE_CHECK}"; then
   set -- "$@" -skip-update-check
 fi
 
-"$@"
+if "$@"; then
+  :
+else
+  status=$?
+  log "ERROR: Auto-download failed (exit ${status})."
+  log "ERROR: If the downloader reports invalid_grant, its saved login has expired or been revoked."
+  if [ -n "${HYTALE_DOWNLOADER_CREDENTIALS_SRC}" ]; then
+    log "ERROR: Replace the credentials mounted at HYTALE_DOWNLOADER_CREDENTIALS_SRC with a fresh downloader login."
+  else
+    log "ERROR: Set HYTALE_DOWNLOADER_RESET_CREDENTIALS=true for one startup and complete the device login in the logs."
+  fi
+  log "ERROR: HYTALE_SESSION_TOKEN_BROKER_TIMEOUT_SECONDS does not affect downloader authentication."
+  log "ERROR: See https://github.com/Hybrowse/hytale-server-docker/blob/main/docs/image/troubleshooting.md#expired-downloader-login-invalid_grant"
+  exit "${status}"
+fi
 
 if [ ! -f "${HYTALE_GAME_ZIP_PATH}" ]; then
   log "ERROR: Auto-download: expected download zip not found: ${HYTALE_GAME_ZIP_PATH}"
