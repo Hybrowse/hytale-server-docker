@@ -4,7 +4,7 @@ version: 1.0.0
 type: application
 appVersion: "latest"
 description: Production-ready Docker image for Hytale servers featuring automatic CurseForge mod management, auto-download with smart update detection, Helm chart, CLI, easy configuration, and quick troubleshooting.
-home: https://hybrowse.gg/docker-image
+home: https://github.com/Hybrowse/hytale-server-docker
 sources:
   - https://github.com/Hybrowse/hytale-server-docker
 keywords:
@@ -14,4 +14,4 @@ keywords:
   - dedicated-server
 maintainers:
   - name: Hybrowse
-    url: https://hybrowse.gg
+    url: https://hybrowse.gg/discord
