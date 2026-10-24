@@ -1,8 +1,29 @@
 FROM eclipse-temurin:25-jre-noble@sha256:3f2223fe04b750aa5a8179e29b5c9a1ddf7665fc9bb08bfe11ad01d143bc13a5
 
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends tini ca-certificates curl unzip jq \
+  && apt-get install -y --no-install-recommends tini ca-certificates curl unzip jq zlib1g \
   && rm -rf /var/lib/apt/lists/*
+
+# The October security release is available before the official Docker images.
+# Keep newer base runtimes when the upstream image catches up.
+ARG TARGETARCH
+RUN set -eu; \
+  current="$(java -XshowSettings:properties -version 2>&1 | sed -n 's/^[[:space:]]*java.version = //p')"; \
+  if dpkg --compare-versions "${current}" ge 25.0.5; then exit 0; fi; \
+  case "${TARGETARCH:-$(dpkg --print-architecture)}" in \
+    amd64) arch=x64; checksum=6fac98f0c8202efc3135a9e9e42aa61963ec42d1c5cbb40caf231e7b14a24ef6 ;; \
+    arm64) arch=aarch64; checksum=963931723891302ebb2687178532c3d793d71e2577cd058061c7efb396140a86 ;; \
+    *) echo "Unsupported Java runtime architecture" >&2; exit 1 ;; \
+  esac; \
+  curl -fsSL "https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.5%2B8/OpenJDK25U-jre_${arch}_linux_hotspot_25.0.5_8.tar.gz" -o /tmp/temurin-jre.tar.gz; \
+  printf '%s  %s\n' "${checksum}" /tmp/temurin-jre.tar.gz | sha256sum -c -; \
+  runtime_dir="$(mktemp -d)"; \
+  tar -xzf /tmp/temurin-jre.tar.gz -C "${runtime_dir}" --strip-components=1; \
+  chmod 0755 "${runtime_dir}"; \
+  rm -rf "${JAVA_HOME}"; \
+  mv "${runtime_dir}" "${JAVA_HOME}"; \
+  rm /tmp/temurin-jre.tar.gz; \
+  java -version
 
 RUN groupadd -f hytale \
   && if ! id -u hytale >/dev/null 2>&1; then useradd -m -u 1000 -o -g hytale -s /usr/sbin/nologin hytale; fi \
