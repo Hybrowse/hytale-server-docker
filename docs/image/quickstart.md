@@ -73,8 +73,9 @@ docker compose exec hytale hytale-cli auth status
 docker compose logs --tail 50
 ```
 
-Keep `/data`: `server/auth.enc`, `server/auth.key` and the saved configuration
-allow Hytale to reuse the selected profile after a restart. Keep the key secret.
+Keep `/data`, including `server/auth.enc`, the saved configuration and
+`.machine-id`, so Hytale can reuse the selected profile after a restart.
+If Hytale uses `server/auth.key` or `HYTALE_AUTH_KEY_FILE`, preserve that secret too.
 Do not delete these files to recover a downloader login; that uses separate credentials.
 
 To start another device login without attaching to the console:
