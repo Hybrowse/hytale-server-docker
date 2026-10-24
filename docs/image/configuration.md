@@ -3,7 +3,12 @@
 ## Java runtime
 
 The official Hytale server requires Java 25.
-This image uses **Adoptium / Eclipse Temurin 25** (`eclipse-temurin:25-jre-noble`, pinned to a digest).
+This image uses **Adoptium / Eclipse Temurin 25**, with a minimum runtime version
+of **25.0.5** (`eclipse-temurin:25-jre-noble`, pinned to a digest).
+While the official Docker image is still on 25.0.4.1, the build installs the official
+25.0.5 JRE archive for AMD64 or ARM64 and verifies its SHA-256 checksum.
+Newer runtimes in the base image are kept. Use `java -version` inside the container
+to check the installed runtime.
 
 ## Auto-download (recommended)
 
