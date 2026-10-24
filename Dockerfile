@@ -1,12 +1,17 @@
 FROM eclipse-temurin:25-jre-noble@sha256:3f2223fe04b750aa5a8179e29b5c9a1ddf7665fc9bb08bfe11ad01d143bc13a5
 
+ARG TARGETARCH
+
 RUN apt-get update \
   && apt-get install -y --no-install-recommends tini ca-certificates curl unzip jq zlib1g \
+  && if [ "${TARGETARCH:-$(dpkg --print-architecture)}" = arm64 ]; then \
+       apt-get install -y --no-install-recommends qemu-user-static; \
+       find /usr/bin -maxdepth 1 -name 'qemu-*-static' ! -name qemu-x86_64-static -delete; \
+     fi \
   && rm -rf /var/lib/apt/lists/*
 
 # The October security release is available before the official Docker images.
 # Keep newer base runtimes when the upstream image catches up.
-ARG TARGETARCH
 RUN set -eu; \
   current="$(java -XshowSettings:properties -version 2>&1 | sed -n 's/^[[:space:]]*java.version = //p')"; \
   if dpkg --compare-versions "${current}" ge 25.0.5; then exit 0; fi; \

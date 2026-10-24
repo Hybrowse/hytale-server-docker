@@ -43,8 +43,7 @@ On subsequent runs, this step is skipped (credentials are stored on the `/data` 
 > For non-interactive setups, seed credentials via `HYTALE_DOWNLOADER_CREDENTIALS_SRC` (mounted secret), or pre-provision `Assets.zip` and `Server/` and set `HYTALE_AUTO_DOWNLOAD=false`.
 
 > [!NOTE]
-> **Apple Silicon (arm64):** The official downloader only supports `linux/amd64`.
-> Add `platform: linux/amd64` to your Compose file (uses emulation), or provision files manually: [`server-files.md`](server-files.md)
+> **Apple Silicon / ARM64:** Use the native image. It emulates only the official downloader; Java stays native. No `platform: linux/amd64` setting is needed. Manual provisioning is also supported: [`server-files.md`](server-files.md)
 
 > [!IMPORTANT]
 > **After** the server starts, you must authenticate it before players can connect.

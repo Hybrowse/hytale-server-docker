@@ -5,7 +5,7 @@
 
 Manual provisioning is needed if:
 
-- You are on **Apple Silicon (arm64)** and don't want to use `platform: linux/amd64` emulation
+- You prefer to provision files yourself instead of running the downloader (available on AMD64 and ARM64)
 - You want to pin a specific server version
 - You prefer full control over file provisioning
 

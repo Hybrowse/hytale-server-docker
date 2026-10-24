@@ -45,12 +45,12 @@ If you want fully non-interactive automation, see: [Non-interactive auto-downloa
 
 For safety, `HYTALE_DOWNLOADER_URL` is restricted to `https://downloader.hytale.com/`.
 
-Current limitation:
-
-- Auto-download is supported on `linux/amd64` only, because the official downloader archive currently does not include a `linux/arm64` binary.
-- On `linux/arm64`, you must provide the server files and `Assets.zip` manually.
-
-On arm64 hosts (for example Apple Silicon), you can also run the container as `linux/amd64` (Compose: `platform: linux/amd64`).
+Auto-download works on both `linux/amd64` and `linux/arm64`. The official
+archive currently provides an x86-64 downloader only. On ARM64, the image runs
+that helper through QEMU user-mode emulation, including its version checks.
+Java and the Hytale server remain native ARM64. No privileged mode or host
+binfmt registration is required. AMD64 images do not install the emulator.
+Manual provisioning remains available; see [`server-files.md`](server-files.md).
 
 ## Startup order (important)
 

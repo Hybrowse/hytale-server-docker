@@ -4,12 +4,12 @@ set -eu
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 workdir="$(mktemp -d)"
 trap 'rm -rf "${workdir}"' EXIT INT TERM
-mkdir -p "${workdir}/package/Server" "${workdir}/data/.hytale-downloader"
+mkdir -p "${workdir}/package/Server" "${workdir}/data with spaces/.hytale-downloader"
 printf 'assets' > "${workdir}/package/Assets.zip"
 printf 'server' > "${workdir}/package/Server/HytaleServer.jar"
 (cd "${workdir}/package" && zip -qr "${workdir}/game.zip" .)
 
-cat > "${workdir}/data/.hytale-downloader/hytale-downloader" <<'DOWNLOADER'
+cat > "${workdir}/data with spaces/.hytale-downloader/hytale-downloader" <<'DOWNLOADER'
 #!/bin/sh
 set -eu
 if [ "${1}" = "-print-version" ]; then
@@ -24,11 +24,11 @@ echo 'DEVICE LOGIN (test stub)'
 printf 'fresh-login' > .hytale-downloader-credentials.json
 cp "${TEST_GAME_ZIP}" "$2"
 DOWNLOADER
-chmod +x "${workdir}/data/.hytale-downloader/hytale-downloader"
+chmod +x "${workdir}/data with spaces/.hytale-downloader/hytale-downloader"
 
-export DATA_DIR="${workdir}/data"
+export DATA_DIR="${workdir}/data with spaces"
 export SERVER_DIR="${DATA_DIR}/server"
-export HYTALE_TEST_ARCH=amd64
+export HYTALE_TEST_ARCH="${HYTALE_TEST_ARCH:-amd64}"
 export TEST_GAME_ZIP="${workdir}/game.zip"
 printf 'expired-login' > "${DATA_DIR}/.hytale-downloader-credentials.json"
 printf 'server-login' > "${DATA_DIR}/auth.enc"
