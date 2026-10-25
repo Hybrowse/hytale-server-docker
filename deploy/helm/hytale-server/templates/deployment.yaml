@@ -1,3 +1,4 @@
+{{- include "hytale-server.validate" . }}
 {{- if eq .Values.workload.kind "Deployment" }}
 apiVersion: apps/v1
 kind: Deployment
@@ -7,6 +8,10 @@ metadata:
     {{- include "hytale-server.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  {{- if .Values.persistence.enabled }}
+  strategy:
+    type: Recreate
+  {{- end }}
   selector:
     matchLabels:
       {{- include "hytale-server.selectorLabels" . | nindent 6 }}

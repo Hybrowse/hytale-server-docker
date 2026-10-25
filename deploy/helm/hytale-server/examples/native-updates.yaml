@@ -1,0 +1,17 @@
+# Use a direct Hytale OAuth login; broker session tokens cannot download updates.
+persistence:
+  enabled: true
+  size: 40Gi
+probes:
+  enabled: true
+  startup:
+    enabled: false
+  liveness:
+    enabled: false
+env:
+  HYTALE_AUTO_DOWNLOAD: "true"
+  HYTALE_AUTO_UPDATE: "false"
+  HYTALE_NATIVE_UPDATES: "true"
+  HYTALE_ENABLE_BACKUP: "true"
+  HYTALE_BACKUP_ARCHIVE_MAX_COUNT: "3"
+  ENABLE_AOT: "auto"

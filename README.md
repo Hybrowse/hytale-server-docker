@@ -76,7 +76,7 @@ See: [`docs/image/configuration.md`](docs/image/configuration.md#send-console-co
 - [`docs/image/curseforge-mods.md`](docs/image/curseforge-mods.md) — automatic CurseForge mod download and updates
 - [`docs/image/troubleshooting.md`](docs/image/troubleshooting.md) — common issues
 - [`docs/image/backups.md`](docs/image/backups.md) — backup configuration
-- [`docs/image/server-files.md`](docs/image/server-files.md) — manual provisioning (arm64, etc.)
+- [`docs/image/server-files.md`](docs/image/server-files.md) — manual provisioning of server files
 - [`docs/image/upgrades.md`](docs/image/upgrades.md) — upgrade guidance
 - [`docs/image/security.md`](docs/image/security.md) — security hardening
 

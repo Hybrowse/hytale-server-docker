@@ -2,26 +2,34 @@ Release "{{ .Release.Name }}" has been deployed.
 
 Resources:
   Service (UDP): {{ include "hytale-server.fullname" . }}:{{ .Values.service.port }}
-  StatefulSet:   {{ include "hytale-server.fullname" . }}
+  {{ .Values.workload.kind }}: {{ include "hytale-server.fullname" . }}
+  Image: {{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}
 
 Persistence:
-  /data is backed by a PersistentVolumeClaim when persistence.enabled=true.
-  To run without persistence, set persistence.enabled=false.
+{{- if .Values.persistence.enabled }}
+  Keep /data: it contains worlds, server files, encrypted login and machine identity.
+  New claims default to 20Gi. Allow more space for worlds, mods, backups and native updates.
+  Changing persistence.size does not resize an existing StatefulSet claim automatically.
+{{- else }}
+  WARNING: /data uses emptyDir. Pod replacement loses worlds, files and login credentials.
+{{- end }}
 
-Configuration:
-  Use .Values.env to set environment variables (see https://github.com/Hybrowse/hytale-server-docker/blob/main/docs/image/configuration.md).
-  HYTALE_BIND defaults to 0.0.0.0:{{ .Values.service.port }} unless you set env.HYTALE_BIND.
+First startup:
+  Set env.HYTALE_AUTO_DOWNLOAD=true to download missing files, or provision them first.
+  Follow downloader and automatic server login prompts in: kubectl logs -f <pod>
+  Select a profile: kubectl exec <pod> -- hytale-cli auth select <name-or-number>
+  Existing stored credentials, supplied tokens and broker auth skip automatic server login.
 
-Naming:
-  By default resources are named <release>-<chart> (e.g. hytale-hytale-server).
-  To use a shorter name, set either nameOverride or fullnameOverride, for example:
-    --set nameOverride=hytale
+ARM64:
+  Downloads work on AMD64 and ARM64; only the official downloader is emulated on ARM64.
+  Java stays native. No privileged mode or architecture node selector is required.
 
-ARM64 / auto-download:
-  Auto-download is amd64-only. On mixed-arch clusters you can schedule the pod to amd64 nodes:
-    --set nodeSelector.kubernetes\.io/arch=amd64
+Probes and updates:
+  probes.enabled=true enables readiness by default without a startup or liveness timeout.
+  Readiness checks process/files/UDP, not successful account authentication.
+  Native updates are opt-in. Keep a PVC, backups and enough disk space; see the guide.
 
-Secrets:
-  Server auth tokens: set .Values.secrets.serverAuth (Secret name + keys).
-  CurseForge API key: set .Values.secrets.curseforge (Secret name + key).
-  Downloader credentials: set .Values.secrets.downloaderCredentials (Secret name + key).
+Configuration and secrets:
+  Use .Values.env for image settings; HYTALE_BIND defaults to 0.0.0.0:{{ .Values.service.port }}.
+  .Values.secrets supports server tokens, CurseForge API keys and downloader credentials.
+  Guide: https://github.com/Hybrowse/hytale-server-docker/blob/main/docs/image/kubernetes.md

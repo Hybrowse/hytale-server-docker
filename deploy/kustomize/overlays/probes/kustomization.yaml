@@ -10,15 +10,6 @@ patches:
       name: hytale-server
     patch: |-
       - op: add
-        path: /spec/template/spec/containers/0/startupProbe
-        value:
-          exec:
-            command:
-              - /usr/local/bin/hytale-healthcheck
-          periodSeconds: 10
-          timeoutSeconds: 5
-          failureThreshold: 60
-      - op: add
         path: /spec/template/spec/containers/0/readinessProbe
         value:
           exec:
