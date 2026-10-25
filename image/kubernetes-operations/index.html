@@ -1,0 +1,2250 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Set up, configure and troubleshoot the Hybrowse Hytale server image.">
+      
+      
+      
+        <link rel="canonical" href="https://hybrowse.github.io/hytale-server-docker/image/kubernetes-operations/">
+      
+      
+      
+        <link rel="prev" href="../kustomize/">
+      
+      
+        <link rel="next" href="../diagnostics/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="zensical-0.0.72">
+    
+    
+      
+        <title>Operations and upgrades - Hytale Server on Docker</title>
+      
+    
+    
+      
+        
+      
+      <link rel="stylesheet" href="../../assets/stylesheets/classic/main.94dd801d.min.css">
+      
+        
+          
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/classic/palette.813d4b3f.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_scope.pathname.endsWith("/")||(__md_scope=new URL(__md_scope.pathname+"/",location)),__md_hash=e=>[...e].reduce(((e,t)=>(e<<5)-e+t.charCodeAt(0)),0),__md_get=(e,t=localStorage,_=__md_scope)=>JSON.parse(t.getItem(_.pathname+"."+e)),__md_set=(e,t,_=localStorage,a=__md_scope)=>{try{_.setItem(a.pathname+"."+e,JSON.stringify(t))}catch(e){}},document.documentElement.setAttribute("data-platform",navigator.platform)</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer" aria-hidden="true"></label>
+    <div data-md-component="skip">
+      <a href="#__skip" class="md-skip">
+        Skip to content
+      </a>
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Hytale Server on Docker" class="md-header__button md-logo" aria-label="Hytale Server on Docker" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+      <span class="md-visually-hidden">Navigation</span>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Hytale Server on Docker
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Operations and upgrades
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="none" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="none" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+          <span class="md-visually-hidden">Search</span>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog" aria-label="Search">
+  <button type="button" class="md-search__button">
+    Search
+  </button>
+</div>
+      
+    
+    <div class="md-header__source">
+      
+        <a href="https://github.com/Hybrowse/hytale-server-docker" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Hybrowse/hytale-server-docker
+  </div>
+</a>
+      
+    </div>
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Hytale Server on Docker" class="md-nav__button md-logo" aria-label="Hytale Server on Docker" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Hytale Server on Docker
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Hybrowse/hytale-server-docker" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Hybrowse/hytale-server-docker
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Home
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Getting started
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        
+          <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+            <label class="md-nav__title" for="__nav_2">
+              <span class="md-nav__icon md-icon"></span>
+              
+  
+  Getting started
+
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
+              
+                
+                  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Docker Compose
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+                
+              
+                
+                  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../authentication/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Authentication
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+                
+              
+                
+                  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../networking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Networking
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+                
+              
+                
+                  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../data/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Data and permissions
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+                
+              
+                
+                  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../server-files/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Manual server files
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+                
+              
+            </ul>
+          </nav>
+        
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Configuration
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        
+          <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+            <label class="md-nav__title" for="__nav_3">
+              <span class="md-nav__icon md-icon"></span>
+              
+  
+  Configuration
+
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
+              
+                
+                  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Choose a topic
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+                
+              
+                
+                  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../config-files/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Server and mod JSON
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+                
+              
+                
+                  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../downloads/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Downloads and credentials
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+                
+              
+                
+                  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../runtime/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Java, memory and AOT
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+                
+              
+                
+                  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../startup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Startup order
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+                
+              
+            </ul>
+          </nav>
+        
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Guides
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        
+          <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+            <label class="md-nav__title" for="__nav_4">
+              <span class="md-nav__icon md-icon"></span>
+              
+  
+  Guides
+
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
+              
+                
+                  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../curseforge-mods/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  CurseForge mods
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+                
+              
+                
+                  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../prestart-downloads/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Pre-start downloads
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+                
+              
+                
+                  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../upgrades/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Image and game updates
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+                
+              
+                
+                  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../backups/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Existing backup options
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+                
+              
+                
+                  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Security
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+                
+              
+                
+                  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Console and CLI
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+                
+              
+            </ul>
+          </nav>
+        
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Kubernetes
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        
+          <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+            <label class="md-nav__title" for="__nav_5">
+              <span class="md-nav__icon md-icon"></span>
+              
+  
+  Kubernetes
+
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
+              
+                
+                  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kubernetes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Helm setup
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+                
+              
+                
+                  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kustomize/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Kustomize
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+                
+              
+                
+                  
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      
+        <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Operations and upgrades
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="././" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Operations and upgrades
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#important-server-files-and-persistence" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Important: server files and persistence
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Important: server files and persistence">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#recommended-production-patterns-for-server-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Recommended production patterns for server files
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#first-startup-and-profile-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        First startup and profile selection
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#probes-during-downloads-and-updates" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Probes during downloads and updates
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#native-hytale-updates-on-kubernetes" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Native Hytale updates on Kubernetes
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#renew-an-expired-downloader-login" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Renew an expired downloader login
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#upgrading-existing-helm-installations-and-pvcs" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Upgrading existing Helm installations and PVCs
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-the-manifest-tests-cover" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        What the manifest tests cover
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+                
+              
+            </ul>
+          </nav>
+        
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Troubleshooting
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        
+          <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+            <label class="md-nav__title" for="__nav_6">
+              <span class="md-nav__icon md-icon"></span>
+              
+  
+  Troubleshooting
+
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
+              
+                
+                  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../diagnostics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Doctor and reports
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+                
+              
+                
+                  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Symptoms and fixes
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+                
+              
+            </ul>
+          </nav>
+        
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Server stack
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        
+          <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+            <label class="md-nav__title" for="__nav_7">
+              <span class="md-nav__icon md-icon"></span>
+              
+  
+  Server stack
+
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
+              
+                
+                  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../stack/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Overview
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+                
+              
+                
+                  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../stack/broker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Session Token Broker
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+                
+              
+                
+                  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../stack/router/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Hyrouter
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+                
+              
+            </ul>
+          </nav>
+        
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Reference
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        
+          <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+            <label class="md-nav__title" for="__nav_8">
+              <span class="md-nav__icon md-icon"></span>
+              
+  
+  Reference
+
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
+              
+                
+                  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/environment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Environment variables
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+                
+              
+                
+                  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/downloads/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Downloads
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+                
+              
+                
+                  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/authentication/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Authentication
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+                
+              
+                
+                  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  JSON configuration
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+                
+              
+                
+                  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/runtime/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Java and AOT
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+                
+              
+                
+                  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/mods/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Mods and content
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+                
+              
+                
+                  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Operations
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+                
+              
+                
+                  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/server/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Server flags
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+                
+              
+                
+                  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/compatibility/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Hytale compatibility
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+                
+              
+            </ul>
+          </nav>
+        
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Contributing
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        
+          <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+            <label class="md-nav__title" for="__nav_9">
+              <span class="md-nav__icon md-icon"></span>
+              
+  
+  Contributing
+
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
+              
+                
+                  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Documentation
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+                
+              
+                
+                  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Image development
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+                
+              
+            </ul>
+          </nav>
+        
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#important-server-files-and-persistence" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Important: server files and persistence
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Important: server files and persistence">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#recommended-production-patterns-for-server-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Recommended production patterns for server files
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#first-startup-and-profile-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        First startup and profile selection
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#probes-during-downloads-and-updates" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Probes during downloads and updates
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#native-hytale-updates-on-kubernetes" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Native Hytale updates on Kubernetes
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#renew-an-expired-downloader-login" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Renew an expired downloader login
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#upgrading-existing-helm-installations-and-pvcs" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Upgrading existing Helm installations and PVCs
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-the-manifest-tests-cover" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        What the manifest tests cover
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                <a id="__skip" tabindex="-1"></a>
+                
+                  
+
+  
+    <a href="https://github.com/Hybrowse/hytale-server-docker/edit/main/docs/image/kubernetes-operations.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="kubernetes-operations">Kubernetes operations<a class="headerlink" href="#kubernetes-operations" title="Permanent link">&para;</a></h1>
+<p>Use this page after <a href="../kubernetes/">installing the chart</a> or choosing a <a href="../kustomize/">Kustomize overlay</a>. Keep your namespace and release name consistent across commands.</p>
+<h2 id="important-server-files-and-persistence">Important: server files and persistence<a class="headerlink" href="#important-server-files-and-persistence" title="Permanent link">&para;</a></h2>
+<p>The container expects its data under <code>/data</code>:</p>
+<ul>
+<li><code>/data/Assets.zip</code></li>
+<li><code>/data/server/HytaleServer.jar</code></li>
+</ul>
+<p>Whether you persist <code>/data</code> depends on your operation model:</p>
+<ul>
+<li>If you want the server files, mods, backups, and generated state to survive restarts, use a PVC.</li>
+<li>If you want fully ephemeral nodes and sync state elsewhere (e.g. an external backup/sync process), you can run without a PVC.</li>
+</ul>
+<p>If you enable auto-download (<code>HYTALE_AUTO_DOWNLOAD=true</code>), the server files can be downloaded at runtime into <code>/data</code>.</p>
+<p>Note: We intentionally do not enable a read-only root filesystem by default. The official server workflow can require writing a machine-id (and while the image has workarounds, a strictly read-only root filesystem can still be surprising operationally).</p>
+<h3 id="recommended-production-patterns-for-server-files">Recommended production patterns for server files<a class="headerlink" href="#recommended-production-patterns-for-server-files" title="Permanent link">&para;</a></h3>
+<p>For non-interactive Kubernetes operations, prefer one of these:</p>
+<ul>
+<li>Keep <code>HYTALE_AUTO_DOWNLOAD=true</code> and mount a downloader credentials secret as <code>HYTALE_DOWNLOADER_CREDENTIALS_SRC</code>.</li>
+<li>Set <code>HYTALE_AUTO_DOWNLOAD=false</code> and provision <code>/data/Assets.zip</code> + <code>/data/server/</code> before container startup (for example with an init container).</li>
+</ul>
+<p>Why this matters: Session Token Broker runs later in startup. If auto-download is still waiting for first-time auth (or fails), broker logs/calls are not reached yet.</p>
+<h2 id="first-startup-and-profile-selection">First startup and profile selection<a class="headerlink" href="#first-startup-and-profile-selection" title="Permanent link">&para;</a></h2>
+<p>For the following examples, run commands in the server namespace (<code>kubectl -n &lt;namespace&gt;</code>).
+The examples live in the source repository; download them or run Helm from a checkout.
+For example, install the published image with the first-start values file:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>helm<span class="w"> </span>upgrade<span class="w"> </span>--install<span class="w"> </span>hytale<span class="w"> </span>./deploy/helm/hytale-server<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span>-f<span class="w"> </span>deploy/helm/hytale-server/examples/first-start.yaml
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-l<span class="w"> </span>app.kubernetes.io/instance<span class="o">=</span>hytale
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>kubectl<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>&lt;pod&gt;<span class="w"> </span>-c<span class="w"> </span>hytale-server
+</code></pre></div>
+<p>There are two independent logins: the downloader login before Java starts, then
+Hytale's server login, which the image starts automatically on a fresh installation.
+Both URLs/codes appear in the logs. If Hytale lists several profiles:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>&lt;pod&gt;<span class="w"> </span>-c<span class="w"> </span>hytale-server<span class="w"> </span>--<span class="w"> </span>hytale-cli<span class="w"> </span>auth<span class="w"> </span><span class="k">select</span><span class="w"> </span>&lt;name-or-number&gt;
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>&lt;pod&gt;<span class="w"> </span>-c<span class="w"> </span>hytale-server<span class="w"> </span>--<span class="w"> </span>hytale-cli<span class="w"> </span>auth<span class="w"> </span>status
+</code></pre></div>
+<p>No terminal attachment or <code>stdin</code>/<code>tty</code> setting is needed. Use <code>hytale-cli auth login</code>
+to start a login manually. <code>HYTALE_AUTO_AUTH=false</code> opts out. Stored credentials,
+broker authentication and supplied server tokens skip automatic server login.
+Keep the whole PVC, including <code>server/auth.enc</code>, server configuration and <code>.machine-id</code>.
+A new Pod can reuse that login when it mounts the same data. With <code>emptyDir</code>, Pod
+replacement loses this data. Readiness does not prove that OAuth login succeeded.</p>
+<p>The <a href="https://github.com/Hybrowse/hytale-server-docker/blob/main/deploy/helm/hytale-server/examples/broker.yaml">broker values example</a>
+shows separate existing Secrets for downloader credentials and the broker bearer
+token. It deploys only the game server; deploy/authenticate the broker separately.
+Create the referenced Secrets in the server namespace. Secret values are never
+embedded in these examples. Do not put raw credentials in Helm <code>env</code> values.</p>
+<h2 id="probes-during-downloads-and-updates">Probes during downloads and updates<a class="headerlink" href="#probes-during-downloads-and-updates" title="Permanent link">&para;</a></h2>
+<p>Helm probes remain opt-in with <code>probes.enabled=true</code>. When enabled, the default
+is readiness only; startup and liveness probes are disabled. Kustomize's <code>probes</code>
+and <code>production</code> overlays use the same readiness-only policy.</p>
+<p>A failed readiness check removes a Pod from Service endpoints without restarting
+it. Our check verifies server files, the process and UDP listener; it does not
+verify completed authentication or that a full world has loaded. A failed startup
+or liveness probe can restart the container. Therefore avoid restart probes during
+manual login, slow downloads and native in-process update handovers. The startup
+probe runs only at container startup, so extending it does not protect later updates.</p>
+<p>For fully provisioned deployments you may explicitly enable startup/liveness probes
+and tune their thresholds. The optional startup default now allows 30 minutes
+(<code>180 * 10s</code>); choose a budget based on your actual environment. Keep liveness
+disabled for native updates unless you provide a check and budget that tolerate
+archive verification, backups and the Java restart.</p>
+<p>Temporary extraction files are disk-backed <code>emptyDir</code>. Plan node ephemeral-storage
+capacity and limits for extracted server files; <code>resources</code> accepts Kubernetes
+requests/limits including <code>ephemeral-storage</code>. The download archive and assets live
+on <code>/data</code>. Using <code>tmp.emptyDir.medium=Memory</code> makes extraction count towards Pod
+memory usage, which can cause an OOM on constrained Pods.</p>
+<h2 id="native-hytale-updates-on-kubernetes">Native Hytale updates on Kubernetes<a class="headerlink" href="#native-hytale-updates-on-kubernetes" title="Permanent link">&para;</a></h2>
+<p>The <a href="https://github.com/Hybrowse/hytale-server-docker/blob/main/deploy/helm/hytale-server/examples/native-updates.yaml">native-update values example</a>
+uses a 40Gi PVC, backups and readiness only:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nt">env</span><span class="p">:</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="nt">HYTALE_AUTO_DOWNLOAD</span><span class="p">:</span><span class="w"> </span><span class="s">"true"</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="nt">HYTALE_AUTO_UPDATE</span><span class="p">:</span><span class="w"> </span><span class="s">"false"</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span><span class="nt">HYTALE_NATIVE_UPDATES</span><span class="p">:</span><span class="w"> </span><span class="s">"true"</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">  </span><span class="nt">HYTALE_ENABLE_BACKUP</span><span class="p">:</span><span class="w"> </span><span class="s">"true"</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">  </span><span class="nt">HYTALE_BACKUP_ARCHIVE_MAX_COUNT</span><span class="p">:</span><span class="w"> </span><span class="s">"3"</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">  </span><span class="nt">ENABLE_AOT</span><span class="p">:</span><span class="w"> </span><span class="s">"auto"</span>
+</code></pre></div>
+<p>Use Hytale's direct OAuth login stored on the data volume. Broker session tokens
+alone cannot check for or download native updates. Keep the standard writable
+JAR/assets paths; do not mount individual server files read-only. The 40Gi example
+is a starting point, not a capacity guarantee: account for worlds, mods, staged
+assets, replacement copies and both server/update backups. Monitor free space.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>&lt;pod&gt;<span class="w"> </span>-c<span class="w"> </span>hytale-server<span class="w"> </span>--<span class="w"> </span>hytale-cli<span class="w"> </span>send<span class="w"> </span><span class="s2">"/update check"</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>&lt;pod&gt;<span class="w"> </span>-c<span class="w"> </span>hytale-server<span class="w"> </span>--<span class="w"> </span>hytale-cli<span class="w"> </span>send<span class="w"> </span><span class="s2">"/update download"</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="c1"># Check the logs and wait for the download to finish before applying:</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>&lt;pod&gt;<span class="w"> </span>-c<span class="w"> </span>hytale-server<span class="w"> </span>--<span class="w"> </span>hytale-cli<span class="w"> </span>send<span class="w"> </span><span class="s2">"/update apply --confirm"</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>kubectl<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>&lt;pod&gt;<span class="w"> </span>-c<span class="w"> </span>hytale-server
+</code></pre></div>
+<p>The container stays alive while its runner installs the staged package and starts
+Java again. Readiness may become false during this period. Keep enough termination
+grace for world saving and backups (the chart defaults to 120 seconds; measure your
+own workload). If an installation is interrupted, the runner recovers its recorded
+transaction on the next start. Do not manually remove that transaction directory.
+The file-replacement recovery does not undo world/config migrations after a new
+server has started. See the <a href="../upgrades/">update and rollback guide</a>.</p>
+<p>Image upgrades and game updates are separate: select a new image tag through Helm
+or your Kustomize overlay. With native game updates enabled, set
+<code>HYTALE_AUTO_UPDATE=false</code> so startup downloads do not overwrite that installation.</p>
+<h2 id="renew-an-expired-downloader-login">Renew an expired downloader login<a class="headerlink" href="#renew-an-expired-downloader-login" title="Permanent link">&para;</a></h2>
+<p>Do not delete the PVC or the world directory. Downloader credentials are separate
+from server authentication. If a read-only credentials Secret is configured,
+replace it with a newly authenticated downloader credentials file, then recreate
+the Pod; that Secret is copied to <code>/data</code> on startup. <code>subPath</code> Secret mounts do not
+refresh in an existing container. Keep the Secret current as credentials rotate;
+otherwise an old file can overwrite the renewed on-volume credentials next start.</p>
+<p>If the login exists only on <code>/data</code>, use the recovery Job. It uses the standard
+server file paths and may update the game files, so take a data backup first:</p>
+<ol>
+<li>Record the server's replica count and data PVC name. Scale its StatefulSet or
+   Deployment to zero and wait for all server Pods to terminate. Suspend any GitOps
+   reconciliation/autoscaling that would recreate them. This avoids concurrent
+   writes, even on storage that permits multiple mounts.</li>
+<li>Copy <a href="https://github.com/Hybrowse/hytale-server-docker/blob/main/deploy/kubernetes/jobs/renew-downloader-login.yaml">renew-downloader-login.yaml</a>
+   and replace <code>REPLACE_WITH_SERVER_DATA_PVC</code> with that existing PVC. Use the same
+   namespace and, if needed, node placement as the server volume. The Job uses the
+   standard UID/GID 1000; mirror any custom data ownership settings from your server.</li>
+<li>Run the Job and follow its device login:</li>
+</ol>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>renew-downloader-login.yaml
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>kubectl<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>job/hytale-renew-downloader-login
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>kubectl<span class="w"> </span><span class="nb">wait</span><span class="w"> </span>--for<span class="o">=</span><span class="nv">condition</span><span class="o">=</span><span class="nb">complete</span><span class="w"> </span>job/hytale-renew-downloader-login<span class="w"> </span>--timeout<span class="o">=</span>3600s
+</code></pre></div>
+<ol>
+<li>Only after successful completion, remove the Job and scale the server back to
+   its recorded replica count. Resume reconciliation if you paused it.</li>
+</ol>
+<p>The Job resets only downloader credentials and can download/update server files;
+it does not start Java or remove worlds/server credentials. It has no automatic
+retry loop and expires after completion. If it fails, inspect the logs before
+retrying; remove the failed Job before creating it again. Do not mount the old
+credentials Secret or combine credential seeding with reset mode.</p>
+<h2 id="upgrading-existing-helm-installations-and-pvcs">Upgrading existing Helm installations and PVCs<a class="headerlink" href="#upgrading-existing-helm-installations-and-pvcs" title="Permanent link">&para;</a></h2>
+<p>New claims default to 20Gi. This does <strong>not</strong> resize existing claims. Before an
+upgrade, save <code>helm get values &lt;release&gt; --all</code> and inspect the current StatefulSet
+<code>volumeClaimTemplates</code> and actual PVCs. Keep the existing template size in your
+values during the Helm upgrade (for example <code>persistence.size=5Gi</code> for an old
+installation); changing a StatefulSet claim template is rejected by Kubernetes.
+Do not use <code>helm upgrade --force</code> or delete data volumes to work around this.
+If your existing values enable startup/liveness probes, explicitly disable them
+for manual login or native updates; keeping old values also keeps their old probe
+settings. Choose the new readiness-only behavior deliberately.</p>
+<p>If your StorageClass supports expansion, request a larger size on each existing
+PVC separately and wait for expansion to finish. Some storage drivers require a
+Pod restart for filesystem expansion. Back up the data before changes. The
+StatefulSet's original template can remain smaller while an existing PVC is larger;
+new replicas would still request the template size. Plan a separate controlled
+StatefulSet migration if you need a new template size. Existing-claim mode lets
+Helm reference a PVC managed outside the chart.</p>
+<p>Persistent Deployment mode now uses <code>Recreate</code>, so a rollout stops the previous
+Pod before starting its replacement. This causes downtime but avoids normal
+rolling-update overlap against one world. It requires one replica. StatefulSets
+with an explicitly shared <code>existingClaim</code> also require one replica; StatefulSets
+with independent per-replica PVCs can still use multiple replicas. A PVC's
+<code>ReadWriteOnce</code> access mode alone does not prevent two Pods on one node from writing
+at once. During manual recovery or force deletion, wait for the previous process
+to stop before allowing any replacement to access the same volume.</p>
+<p>The single-Pod Kustomize production PDB uses <code>maxUnavailable: 0</code> and can block
+voluntary eviction during node drains. Plan downtime or adjust the budget during
+maintenance instead of force-deleting a running server.</p>
+<p>Helm's NetworkPolicy, if enabled with its default empty egress rules, blocks
+outbound traffic. Configure DNS, HTTPS access for Hytale/downloads and access to
+your broker as needed. Kustomize's production policy currently allows all egress;
+tighten it for your environment without blocking authentication or updates.</p>
+<h2 id="what-the-manifest-tests-cover">What the manifest tests cover<a class="headerlink" href="#what-the-manifest-tests-cover" title="Permanent link">&para;</a></h2>
+<p><code>task k8s:test</code> renders both workload kinds, published-package version overrides,
+first-start/native-update/broker values, existing and ephemeral volumes, secret
+references, replica guards and every Kustomize overlay (including probes).
+It checks Kubernetes schemas and specific safety properties, plus the recovery Job.
+Tools run in pinned Docker images by default. For installed Helm, Kustomize and
+kubeconform, use <code>K8S_TEST_TOOLS=local sh ci/test-k8s-manifests.sh</code> instead.
+Python 3 with venv/pip is required; the script installs pinned PyYAML in a temporary
+virtual environment and removes it afterwards.</p>
+<p>These checks do not start a game server, sign in, mount a real PVC or validate
+storage-driver/network behavior in your cluster. Validate those with a separate
+test release and disposable data before updating production.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../kustomize/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Kustomize">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Kustomize
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../diagnostics/" class="md-footer__link md-footer__link--next" aria-label="Next: Doctor and reports">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Doctor and reports
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://zensical.org/" target="_blank" rel="noopener">
+      Zensical
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog" role="status" aria-atomic="true">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      
+      
+        
+        
+      <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.sections","navigation.top","navigation.footer","content.code.copy","content.action.edit","search.highlight"],"redirect":null,"search":"../../assets/javascripts/workers/search.c47bb847.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","clipboard.error":"Could not copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.10ee5ab6.min.js"></script>
+      
+    
+  </body>
+</html>
