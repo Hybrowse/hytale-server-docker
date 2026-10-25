@@ -1,0 +1,24 @@
+# Existing Secrets and broker Service must be created separately.
+persistence:
+  enabled: true
+  size: 20Gi
+probes:
+  enabled: true
+secrets:
+  downloaderCredentials:
+    name: hytale-downloader-credentials
+    credentialsKey: credentials.json
+extraVolumes:
+  - name: broker-bearer
+    secret:
+      secretName: hytale-broker-bearer
+extraVolumeMounts:
+  - name: broker-bearer
+    mountPath: /run/broker-secret
+    readOnly: true
+env:
+  HYTALE_AUTO_DOWNLOAD: "true"
+  HYTALE_AUTO_UPDATE: "true"
+  HYTALE_SESSION_TOKEN_BROKER_ENABLED: "true"
+  HYTALE_SESSION_TOKEN_BROKER_URL: "http://hytale-session-token-broker:8080"
+  HYTALE_SESSION_TOKEN_BROKER_BEARER_TOKEN_SRC: "/run/broker-secret/token"

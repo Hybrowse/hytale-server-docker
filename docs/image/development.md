@@ -63,16 +63,14 @@ Notes:
 - Credentials will be stored on the `./data` volume.
 - Auto-download currently works on `linux/amd64` only.
 
-## Apple Silicon (arm64) note: running the amd64 container
+## Apple Silicon (ARM64)
 
-On macOS Apple Silicon (arm64), the official downloader inside the container is not available as `linux/arm64`.
-To use `HYTALE_AUTO_DOWNLOAD=true` locally, run the container as `linux/amd64`:
+Use the native ARM64 image for auto-download. The image includes emulation for
+only the official downloader; Java and the game server remain native. No
+`--platform linux/amd64` override is required.
 
-```bash
-task dev:up:auto:amd64
-```
-
-This uses `docker buildx` to build an `amd64` image and runs the container with `--platform linux/amd64`.
+`task dev:up:auto:amd64` is still available when you explicitly want to test the
+AMD64 image through emulation; it is not needed for normal ARM64 development.
 
 ## Server console (interactive)
 

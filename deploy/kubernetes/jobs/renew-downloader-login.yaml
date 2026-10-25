@@ -1,0 +1,49 @@
+# Scale the server to zero first. Replace claimName with its existing data PVC.
+# Do not mount a downloader credentials Secret: this job renews the login on /data.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: hytale-renew-downloader-login
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 3600
+  ttlSecondsAfterFinished: 3600
+  template:
+    spec:
+      restartPolicy: Never
+      automountServiceAccountToken: false
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: downloader
+          image: hybrowse/hytale-server:1.2.0
+          imagePullPolicy: IfNotPresent
+          command: ["/usr/local/bin/hytale-auto-download"]
+          env:
+            - name: HYTALE_AUTO_DOWNLOAD
+              value: "true"
+            - name: HYTALE_AUTO_UPDATE
+              value: "true"
+            - name: HYTALE_DOWNLOADER_RESET_CREDENTIALS
+              value: "true"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: REPLACE_WITH_SERVER_DATA_PVC
+        - name: tmp
+          emptyDir: {}

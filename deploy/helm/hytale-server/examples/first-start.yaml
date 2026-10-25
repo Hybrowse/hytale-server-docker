@@ -1,0 +1,13 @@
+# helm install hytale ./deploy/helm/hytale-server -f this-file.yaml
+persistence:
+  enabled: true
+  size: 20Gi
+probes:
+  enabled: true
+  startup:
+    enabled: false
+  liveness:
+    enabled: false
+env:
+  HYTALE_AUTO_DOWNLOAD: "true"
+  HYTALE_AUTO_AUTH: "true"
