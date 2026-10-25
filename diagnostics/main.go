@@ -173,7 +173,7 @@ func run(args []string, out, errOut io.Writer) int {
 			return 1
 		}
 	} else {
-		fmt.Fprintln(out, "Hytale diagnostics (read-only) — "+r.Status)
+		fmt.Fprintln(out, "Hytale diagnostics (read-only): "+r.Status)
 		for _, ch := range r.Checks {
 			fmt.Fprintf(out, "[%s] %s: %s\n", strings.ToUpper(ch.Status), ch.ID, ch.Message)
 			if len(ch.Details) > 0 {

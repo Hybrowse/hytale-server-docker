@@ -26,6 +26,9 @@ func (c *collector) configuration(server string) {
 	if id := c.env("HYTALE_MACHINE_ID"); id != "" && !regexp.MustCompile(`^[0-9a-f]{32}$`).MatchString(id) {
 		c.add("auth.machine_id_setting", "error", "The configured machine identity is invalid.", "Use exactly 32 lowercase hexadecimal characters and preserve the identity used for stored credentials.", nil)
 	}
+	if c.env("HYTALE_CONFIG_PATCH_JSON") != "" && c.env("HYTALE_CONFIG_PATCH_JSON_SRC") != "" {
+		c.add("config.patch_conflict", "error", "Both inline and file-based JSON patches are configured.", "Set only one of HYTALE_CONFIG_PATCH_JSON and HYTALE_CONFIG_PATCH_JSON_SRC.", nil)
+	}
 	if patch := c.env("HYTALE_CONFIG_PATCH_JSON"); patch != "" {
 		var value any
 		if json.Unmarshal([]byte(patch), &value) != nil {

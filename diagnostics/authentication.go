@@ -57,6 +57,13 @@ func (c *collector) auth(data, server string) {
 		c.add("auth.mode", status, "Authenticated player verification is not configured, or the auth mode is unrecognized.", "Use authenticated mode for normal public servers.", nil)
 	}
 	stored := filepath.Join(server, "auth.enc")
+	localKey := filepath.Join(server, "auth.key")
+	if exists(localKey) {
+		if !nonempty(localKey) {
+			c.add("auth.local_key", "warning", "A local auth key file is empty or unreadable.", "Check access to the existing key; do not replace it without preserving the credential store.", nil)
+		}
+		c.secretPermissions("auth.local_key.permissions", localKey)
+	}
 	if exists(stored) {
 		if nonempty(stored) {
 			c.add("auth.server_store", "info", "Encrypted server credentials exist; decryption and live authentication are unverified.", "Check hytale-cli auth status in the live server logs.", nil)
@@ -68,7 +75,7 @@ func (c *collector) auth(data, server string) {
 	if nonempty(stored) {
 		b, e := read(filepath.Join(data, ".machine-id"), 128)
 		valid := e == nil && regexp.MustCompile(`^[0-9a-f]{32}$`).MatchString(strings.TrimSpace(string(b)))
-		if !valid && c.env("HYTALE_MACHINE_ID") == "" && c.env("HYTALE_AUTH_KEY") == "" && c.env("HYTALE_AUTH_KEY_FILE") == "" {
+		if !valid && c.env("HYTALE_MACHINE_ID") == "" && c.env("HYTALE_AUTH_KEY") == "" && c.env("HYTALE_AUTH_KEY_FILE") == "" && !nonempty(localKey) {
 			c.add("auth.machine_identity", "warning", "Persisted credentials exist, but no persisted machine identity or explicit auth key was found.", "Preserve the complete data volume and the same identity/key across restarts. This check cannot determine which key the store used.", nil)
 		}
 	}
@@ -77,6 +84,7 @@ func (c *collector) auth(data, server string) {
 			c.add("auth.key_file", "error", "Configured auth key file is empty or inaccessible.", "Check the auth key Secret mount without changing its contents.", nil)
 		} else {
 			c.add("auth.key_file", "info", "An auth key file is present; its contents are not included.", "", nil)
+			c.secretPermissions("auth.key_file.permissions", key)
 		}
 	}
 	tokens := 0

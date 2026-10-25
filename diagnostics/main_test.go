@@ -362,3 +362,23 @@ func TestNetworkBudgetAndServerErrors(t *testing.T) {
 	assertStatus(t, c.report, "network.hytale_oauth", "warning")
 	assertStatus(t, c.report, "network.hytale_downloader", "warning")
 }
+
+func TestPersistentLocalKeyAndPatchConflict(t *testing.T) {
+	c, env, data := fixture(t)
+	os.Remove(filepath.Join(data, ".machine-id"))
+	put(t, filepath.Join(data, "server", "auth.key"), "PRIVATE_KEY_CANARY")
+	env["HYTALE_CONFIG_PATCH_JSON"] = "{}"
+	env["HYTALE_CONFIG_PATCH_JSON_SRC"] = filepath.Join(data, "patch.json")
+	put(t, env["HYTALE_CONFIG_PATCH_JSON_SRC"], "{}")
+	r := c.collect(context.Background(), options{})
+	assertStatus(t, r, "config.patch_conflict", "error")
+	for _, ch := range r.Checks {
+		if ch.ID == "auth.machine_identity" {
+			t.Fatal("missed persisted local key")
+		}
+	}
+	b, _ := json.Marshal(r)
+	if strings.Contains(string(b), "PRIVATE_KEY_CANARY") {
+		t.Fatal("key escaped")
+	}
+}
