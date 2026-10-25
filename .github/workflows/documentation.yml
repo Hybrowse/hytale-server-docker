@@ -40,7 +40,7 @@ jobs:
         with:
           # Release docs follow main; the chart is checked out at its own tag below.
           ref: ${{ github.event_name == 'release' && 'main' || github.ref }}
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.13'
           cache: pip
@@ -83,7 +83,7 @@ jobs:
         with:
           ref: ${{ github.event.release.tag_name }}
           path: release-source
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.13'
           cache: pip
