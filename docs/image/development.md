@@ -100,3 +100,25 @@ Example:
 ```bash
 DEV_PORT=5521 task dev:up
 ```
+
+## Diagnostic checks
+
+The read-only diagnostic executable is built from `diagnostics/` with Go's
+standard library. Go is only present in the build stage; the final image receives
+a static executable. The build runs its unit tests on the build platform and
+cross-compiles for the target architecture.
+
+```sh
+cd diagnostics
+go test -race ./...
+go vet ./...
+# From the repository root, after building the image:
+IMAGE_NAME=hytale-server:test sh ci/test-diagnostics.sh
+```
+
+Keep report fields allowlisted: do not add raw errors, arbitrary configuration,
+process arguments, filenames, account identifiers or log excerpts. Tests use
+synthetic secrets and fail if these appear in the serialized report. New checks
+must distinguish absence, an observed failure, and facts that cannot be established
+without contacting or changing a running server. Keep network checks opt-in and
+never use them to refresh credentials or mint a game session.
