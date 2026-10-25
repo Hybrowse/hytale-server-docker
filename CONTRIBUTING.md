@@ -2,6 +2,8 @@
  
 Thanks for contributing!
  
+Read the [documentation](https://hybrowse.github.io/hytale-server-docker/) for image usage. For documentation changes, see [preview and contribution instructions](https://hybrowse.github.io/hytale-server-docker/contributing/).
+
 ## Ground rules
  
 - Keep changes **secure**, **performance-aware**, and **easy to operate**.

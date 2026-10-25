@@ -86,13 +86,13 @@ Notes:
 `HYTALE_CURSEFORGE_MODS` supports a whitespace / newline separated list.
 
 - `123456`
-  - Install the latest file for CurseForge project with ID `123456` (can be found in the sidebar of the mod's page)
+    - Install the latest file for CurseForge project with ID `123456` (can be found in the sidebar of the mod's page)
 - `123456:3456789`
-  - Install a specific file with ID `3456789` for CurseForge project with ID `123456`
+    - Install a specific file with ID `3456789` for CurseForge project with ID `123456`
 - `123456@server`
-  - Pick the latest file whose `fileName` or `displayName` contains `server` for CurseForge project with ID `123456`
+    - Pick the latest file whose `fileName` or `displayName` contains `server` for CurseForge project with ID `123456`
 - `@/path/to/mods.txt`
-  - Load additional entries from a file inside the container
+    - Load additional entries from a file inside the container
 
 ## Environment variables
 
@@ -134,8 +134,8 @@ This allows the gateway to forward requests to the correct upstream (`api.cursef
 ### Mods directory
 
 - Visible mods directory (passed as `--mods`):
-  - `/data/server/mods-curseforge` (default when CurseForge is enabled)
-  - Or whatever you set `HYTALE_MODS_PATH` to
+    - `/data/server/mods-curseforge` (default when CurseForge is enabled)
+    - Or whatever you set `HYTALE_MODS_PATH` to
 
 The image installs each mod file and then creates a stable file in the visible directory:
 
@@ -166,38 +166,38 @@ The image does not attempt to solve a dependency graph or resolve conflicts auto
 In production, treat the mod list as a versioned input and use repeatable rollouts.
 
 - **Pin exact file IDs for stability**
-  - Prefer `modId:fileId` for all critical mods.
-  - This avoids unexpected updates when containers restart.
+    - Prefer `modId:fileId` for all critical mods.
+    - This avoids unexpected updates when containers restart.
 
 - **Freeze updates during normal operation**
-  - Set `HYTALE_CURSEFORGE_AUTO_UPDATE=false` to prevent silent drift.
-  - If you want periodic updates, use a staging environment and promote the pinned file IDs into production.
+    - Set `HYTALE_CURSEFORGE_AUTO_UPDATE=false` to prevent silent drift.
+    - If you want periodic updates, use a staging environment and promote the pinned file IDs into production.
 
 - **Staged rollouts (canary) instead of updating everything at once**
-  - Maintain the mod list in a single source of truth (for example a file you mount and reference via `@/path/to/mods.txt`).
-  - Roll out changes to a single instance first, validate startup and gameplay, then expand to the full fleet.
+    - Maintain the mod list in a single source of truth (for example a file you mount and reference via `@/path/to/mods.txt`).
+    - Roll out changes to a single instance first, validate startup and gameplay, then expand to the full fleet.
 
 - **Make dependencies explicit**
-  - If a mod requires another CurseForge project, list the dependency explicitly in `HYTALE_CURSEFORGE_MODS`.
-  - If you rely on keyword selection (`modId@keyword`), prefer migrating to `modId:fileId` once you have identified a known-good version.
+    - If a mod requires another CurseForge project, list the dependency explicitly in `HYTALE_CURSEFORGE_MODS`.
+    - If you rely on keyword selection (`modId@keyword`), prefer migrating to `modId:fileId` once you have identified a known-good version.
 
 - **Avoid cross-instance mismatches**
-  - Ensure all instances use the same mod list and the same update policy.
-  - If instances share a persistent `/data` volume, keep `HYTALE_CURSEFORGE_LOCK=true` to avoid concurrent installs.
-  - If instances do not share `/data`, pinning file IDs is the most reliable way to keep versions aligned.
+    - Ensure all instances use the same mod list and the same update policy.
+    - If instances share a persistent `/data` volume, keep `HYTALE_CURSEFORGE_LOCK=true` to avoid concurrent installs.
+    - If instances do not share `/data`, pinning file IDs is the most reliable way to keep versions aligned.
 
 - **Operational troubleshooting (conflicts / crashes)**
-  - If startup crashes after a mod update, temporarily pin the previously working file ID and restart.
-  - Use `HYTALE_CURSEFORGE_FAIL_ON_ERROR=true` to prevent starting with a partially installed mod set.
-  - If you suspect a specific mod conflict, bisect by removing half the mods, then narrow down until the problematic entry is found.
+    - If startup crashes after a mod update, temporarily pin the previously working file ID and restart.
+    - Use `HYTALE_CURSEFORGE_FAIL_ON_ERROR=true` to prevent starting with a partially installed mod set.
+    - If you suspect a specific mod conflict, bisect by removing half the mods, then narrow down until the problematic entry is found.
 
 ## Troubleshooting
 
 - If the container logs warn about a missing API key:
-  - set `HYTALE_CURSEFORGE_API_KEY` or `HYTALE_CURSEFORGE_API_KEY_SRC`
-  - set `HYTALE_CURSEFORGE_FAIL_ON_ERROR=true` if you want missing/failed mods to block startup
+    - set `HYTALE_CURSEFORGE_API_KEY` or `HYTALE_CURSEFORGE_API_KEY_SRC`
+    - set `HYTALE_CURSEFORGE_FAIL_ON_ERROR=true` if you want missing/failed mods to block startup
 
 - If a mod cannot be resolved:
-  - verify the numeric project ID / file ID
-  - try pinning a specific file via `modId:fileId`
-  - if using `HYTALE_CURSEFORGE_GAME_VERSION_FILTER`, verify it matches the mod's file metadata
+    - verify the numeric project ID / file ID
+    - try pinning a specific file via `modId:fileId`
+    - if using `HYTALE_CURSEFORGE_GAME_VERSION_FILTER`, verify it matches the mod's file metadata

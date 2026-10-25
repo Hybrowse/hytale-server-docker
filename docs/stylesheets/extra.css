@@ -1,0 +1,34 @@
+/* Navy navigation and accessible blue links in both color schemes. */
+[data-md-color-scheme="default"] {
+  --md-primary-fg-color: #193b58;
+  --md-primary-fg-color--light: #315a7a;
+  --md-primary-fg-color--dark: #102b43;
+  --md-primary-bg-color: #ffffff;
+  --md-accent-fg-color: #205f9b;
+  --md-accent-fg-color--transparent: #205f9b14;
+  --md-typeset-a-color: #205f9b;
+}
+
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: #172f46;
+  --md-primary-fg-color--light: #294c69;
+  --md-primary-fg-color--dark: #102337;
+  --md-primary-bg-color: #f0f5fa;
+  --md-accent-fg-color: #8dbcf1;
+  --md-accent-fg-color--transparent: #8dbcf114;
+  --md-typeset-a-color: #8dbcf1;
+  --md-default-bg-color: #131e2a;
+  --md-default-fg-color: #dce5ee;
+  --md-default-fg-color--light: #b0bfd0;
+  --md-default-fg-color--lighter: #7d90a5;
+  --md-code-bg-color: #1c2b3c;
+  --md-code-fg-color: #dce5ee;
+}
+
+/* Keep long environment names and tables usable on narrow screens. */
+.md-grid { max-width: 88rem; }
+.md-typeset h1 { font-weight: 650; letter-spacing: -0.025em; }
+.md-typeset h2 { font-weight: 600; }
+.md-typeset table:not([class]) { font-size: 0.78rem; }
+.md-typeset td code { overflow-wrap: anywhere; }
+.md-typeset .admonition { font-size: 0.78rem; }

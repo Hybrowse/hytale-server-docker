@@ -1,7 +1,8 @@
 # Server files (manual provisioning)
 
-> [!NOTE]
-> **You usually don't need this page.** By default (`HYTALE_AUTO_DOWNLOAD=true`), the container downloads and provisions server files automatically.
+!!! note
+    **You usually don't need this page.** The quickstart enables `HYTALE_AUTO_DOWNLOAD=true`, so the container downloads and provisions server files automatically.
+
 
 Manual provisioning is needed if:
 
@@ -56,7 +57,7 @@ Documented paths:
 
 - **Windows:** `%appdata%\Hytale\install\release\package\game\latest`
 - **Linux:** `$XDG_DATA_HOME/Hytale/install/release/package/game/latest`
-- **macOS:** `~/Application Support/Hytale/install/release/package/game/latest`
+- **macOS:** `~/Library/Application Support/Hytale/install/release/package/game/latest`
 
 Copy both artifacts (keep them as a matched set when updating):
 

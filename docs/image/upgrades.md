@@ -2,21 +2,30 @@
 
 This document describes how to upgrade the `hybrowse/hytale-server` Docker image safely.
 
+Image updates and game updates are separate. Choose who manages game files:
+
+| Method | Settings | When files change |
+| --- | --- | --- |
+| Startup downloader | `HYTALE_AUTO_DOWNLOAD=true`, `HYTALE_AUTO_UPDATE=true` | Before Java starts, when a new game version is found |
+| Provision only | `HYTALE_AUTO_DOWNLOAD=true`, `HYTALE_AUTO_UPDATE=false` | Only when required files are missing |
+| Native Hytale updater | `HYTALE_NATIVE_UPDATES=true`, `HYTALE_AUTO_UPDATE=false` | After an authorized in-game update |
+| Manual provisioning | `HYTALE_AUTO_DOWNLOAD=false` | When you replace the matched game files yourself |
+
 ## General upgrade guidance
 
-- Prefer pinning a specific image tag (for example `hybrowse/hytale-server:1.2.3`) instead of using `latest`.
+- Prefer pinning a specific image tag (for example `hybrowse/hytale-server:1.2.1`) instead of using `latest`.
 - Always persist `/data` if you expect your server files, universe, mods, auth state, and backups to survive restarts.
 - Consider taking an out-of-band backup (for example a snapshot of the `/data` volume) before upgrading.
 
 ## Graceful shutdown: recommended grace periods
 
 The Hytale dedicated server typically stops and flushes state quickly.
-Based on observed stop times of ~5–15 seconds, a small buffer is still recommended for predictable operations, especially when using mods.
+Allow time for world saving, mods and backups; measure your own shutdown time rather than relying on a universal timeout.
 
-- Docker Compose: `stop_grace_period: 60s`
-- Kubernetes: `terminationGracePeriodSeconds: 60`
+- Docker Compose: `stop_grace_period: 120s`
+- Kubernetes: `terminationGracePeriodSeconds: 120`
 
-If your host is under heavy load, or you run large universes/modpacks, consider increasing this to `90` seconds.
+If your host is under heavy load, or you run large universes/modpacks, increase this further if shutdown does not finish within the configured grace period.
 
 ## Docker Compose upgrade
 
@@ -25,15 +34,15 @@ Typical upgrade flow:
 1. Ensure your `./data:/data` volume mount is persistent.
 2. Stop the container (gracefully):
 
-   - `docker compose down`
+      - `docker compose down`
 
 3. Pull the new image:
 
-   - `docker compose pull`
+      - `docker compose pull`
 
 4. Start again:
 
-   - `docker compose up -d`
+      - `docker compose up -d`
 
 ### Note: server file updates
 
@@ -41,13 +50,13 @@ There are two common models:
 
 - If you use `HYTALE_AUTO_DOWNLOAD=true`:
 
-  - With `HYTALE_AUTO_UPDATE=true` (default), the container checks for updates on each start and downloads new server files into `/data` when an update is available.
-  - With `HYTALE_AUTO_UPDATE=false`, downloads happen only when files are missing.
+    - With `HYTALE_AUTO_UPDATE=true` (default), the container checks for updates on each start and downloads new server files into `/data` when an update is available.
+    - With `HYTALE_AUTO_UPDATE=false`, downloads happen only when files are missing.
 
 - If you provision server files manually:
 
-  - Replace `/data/server/HytaleServer.jar` and `/data/Assets.zip` out-of-band.
-  - This project must not redistribute proprietary server files.
+    - Replace `/data/server/HytaleServer.jar` and `/data/Assets.zip` out-of-band.
+    - This project must not redistribute proprietary server files.
 
 ## Kubernetes upgrade
 
@@ -58,7 +67,7 @@ There are two common models:
 
 Recommended termination grace period:
 
-- `terminationGracePeriodSeconds: 60`
+- `terminationGracePeriodSeconds: 120`
 
 ### Kustomize
 

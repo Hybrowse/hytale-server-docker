@@ -1,0 +1,92 @@
+[project]
+site_name = "Hytale Server on Docker"
+site_description = "Set up, configure and troubleshoot the Hybrowse Hytale server image."
+site_url = "https://hybrowse.github.io/hytale-server-docker/"
+repo_url = "https://github.com/Hybrowse/hytale-server-docker"
+repo_name = "Hybrowse/hytale-server-docker"
+edit_uri = "edit/main/docs/"
+strict = true
+extra_css = ["stylesheets/extra.css"]
+nav = [
+  { "Home" = "index.md" },
+  { "Getting started" = [
+    { "Docker Compose" = "image/quickstart.md" },
+    { "Authentication" = "image/authentication.md" },
+    { "Networking" = "image/networking.md" },
+    { "Data and permissions" = "image/data.md" },
+    { "Manual server files" = "image/server-files.md" },
+  ] },
+  { "Configuration" = [
+    { "Choose a topic" = "image/configuration.md" },
+    { "Server and mod JSON" = "image/config-files.md" },
+    { "Downloads and credentials" = "image/downloads.md" },
+    { "Java, memory and AOT" = "image/runtime.md" },
+    { "Startup order" = "image/startup.md" },
+  ] },
+  { "Guides" = [
+    { "CurseForge mods" = "image/curseforge-mods.md" },
+    { "Pre-start downloads" = "image/prestart-downloads.md" },
+    { "Image and game updates" = "image/upgrades.md" },
+    { "Existing backup options" = "image/backups.md" },
+    { "Security" = "image/security.md" },
+    { "Console and CLI" = "image/cli.md" },
+  ] },
+  { "Kubernetes" = [
+    { "Helm setup" = "image/kubernetes.md" },
+    { "Kustomize" = "image/kustomize.md" },
+    { "Operations and upgrades" = "image/kubernetes-operations.md" },
+  ] },
+  { "Troubleshooting" = [
+    { "Doctor and reports" = "image/diagnostics.md" },
+    { "Symptoms and fixes" = "image/troubleshooting.md" },
+  ] },
+  { "Server stack" = [
+    { "Overview" = "stack/index.md" },
+    { "Session Token Broker" = "stack/broker.md" },
+    { "Hyrouter" = "stack/router.md" },
+  ] },
+  { "Reference" = [
+    { "Environment variables" = "reference/environment.md" },
+    { "Downloads" = "reference/downloads.md" },
+    { "Authentication" = "reference/authentication.md" },
+    { "JSON configuration" = "reference/configuration.md" },
+    { "Java and AOT" = "reference/runtime.md" },
+    { "Mods and content" = "reference/mods.md" },
+    { "Operations" = "reference/operations.md" },
+    { "Server flags" = "reference/server.md" },
+    { "Hytale compatibility" = "reference/compatibility.md" },
+  ] },
+  { "Contributing" = [
+    { "Documentation" = "contributing.md" },
+    { "Image development" = "image/development.md" },
+  ] },
+]
+
+[project.theme]
+variant = "classic"
+font = false
+features = ["navigation.sections", "navigation.top", "navigation.footer", "content.code.copy", "content.action.edit", "search.highlight"]
+
+[[project.theme.palette]]
+scheme = "default"
+primary = "custom"
+accent = "custom"
+toggle.icon = "material/brightness-4"
+toggle.name = "Switch to dark mode"
+
+[[project.theme.palette]]
+scheme = "slate"
+primary = "custom"
+accent = "custom"
+toggle.icon = "material/brightness-7"
+toggle.name = "Switch to light mode"
+
+[project.markdown_extensions]
+admonition = {}
+attr_list = {}
+tables = {}
+"pymdownx.details" = {}
+"pymdownx.superfences" = {}
+"pymdownx.highlight" = { anchor_linenums = true }
+"pymdownx.tabbed" = { alternate_style = true }
+"toc" = { permalink = true }

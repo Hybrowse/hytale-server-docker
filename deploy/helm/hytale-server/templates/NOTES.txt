@@ -32,4 +32,4 @@ Probes and updates:
 Configuration and secrets:
   Use .Values.env for image settings; HYTALE_BIND defaults to 0.0.0.0:{{ .Values.service.port }}.
   .Values.secrets supports server tokens, CurseForge API keys and downloader credentials.
-  Guide: https://github.com/Hybrowse/hytale-server-docker/blob/main/docs/image/kubernetes.md
+  Guide: https://hybrowse.github.io/hytale-server-docker/image/kubernetes/
