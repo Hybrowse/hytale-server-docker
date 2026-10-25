@@ -31,6 +31,7 @@ For legal/policy notes (unofficial status, no redistribution, and operator respo
 - Then: [`configuration.md`](configuration.md)
 - Kubernetes: [`kubernetes.md`](kubernetes.md)
 - Mods (CurseForge): [`curseforge-mods.md`](curseforge-mods.md)
+- Read-only checks and support reports: [`diagnostics.md`](diagnostics.md)
 - Common issues: [`troubleshooting.md`](troubleshooting.md)
 - Ops: [`backups.md`](backups.md)
 - Manual provisioning: [`server-files.md`](server-files.md)

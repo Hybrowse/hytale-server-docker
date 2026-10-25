@@ -20,6 +20,9 @@ jobs:
         run: |
           docker build -t hytale-server:test .
 
+      - name: Test read-only diagnostics
+        run: IMAGE_NAME=hytale-server:test sh ci/test-diagnostics.sh
+
       - name: Run image validation tests
         run: |
           chmod +x ci/test-image.sh
@@ -53,6 +56,9 @@ jobs:
       - uses: actions/checkout@v7
       - name: Build native ARM64 image
         run: docker build -t hytale-server:test .
+      - name: Test read-only diagnostics
+        run: IMAGE_NAME=hytale-server:test sh ci/test-diagnostics.sh
+
       - name: Run image validation tests
         run: IMAGE_NAME=hytale-server:test sh ci/test-image.sh
       - name: Run official downloader without authentication

@@ -9,6 +9,9 @@ Usage:
   hytale-cli auth login      # start a persistent device login
   hytale-cli auth select <name-or-number>
   hytale-cli auth status
+  hytale-cli doctor [--json] [--strict] [--network] [--verify-archives]
+  hytale-cli status          # same read-only checks as doctor
+  hytale-cli report          # allowlisted JSON support report
 
 Examples:
   hytale-cli send "/auth status"
@@ -21,6 +24,14 @@ is_true() {
     *) return 1 ;;
   esac
 }
+
+# Diagnostics do not depend on a running server or a writable console FIFO.
+cmd="${1:-}"
+shift || true
+case "${cmd}" in
+  doctor|status) exec /usr/local/bin/hytale-diagnostics "$@" ;;
+  report) exec /usr/local/bin/hytale-diagnostics --json "$@" ;;
+esac
 
 if ! is_true "${HYTALE_CONSOLE_PIPE:-true}"; then
   printf 'ERROR: Console command injection is disabled (HYTALE_CONSOLE_PIPE=false).\n' >&2
@@ -50,9 +61,6 @@ write_to_console() {
 
   printf '%s\n' "${line}" > "${FIFO_PATH}"
 }
-
-cmd="${1:-}"
-shift || true
 
 case "${cmd}" in
   auth)

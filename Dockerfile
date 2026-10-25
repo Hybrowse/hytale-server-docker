@@ -1,3 +1,12 @@
+FROM --platform=$BUILDPLATFORM golang:1.27.3-alpine3.24@sha256:b8c9b82affbbb82a020bbcf998dad2ba9516944ac7e883524642a481a9505e9c AS diagnostics-build
+WORKDIR /src
+COPY diagnostics/ ./
+RUN go test ./...
+ARG TARGETOS
+ARG TARGETARCH
+ARG HYTALE_IMAGE_VERSION=development
+RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH:-amd64} go build -trimpath -ldflags "-s -w -X main.imageVersion=${HYTALE_IMAGE_VERSION}" -o /out/hytale-diagnostics .
+
 FROM eclipse-temurin:25-jre-noble@sha256:3f2223fe04b750aa5a8179e29b5c9a1ddf7665fc9bb08bfe11ad01d143bc13a5
 
 ARG TARGETARCH
@@ -49,6 +58,7 @@ COPY scripts/auto-download.sh /usr/local/bin/hytale-auto-download
 COPY scripts/curseforge-mods.sh /usr/local/bin/hytale-curseforge-mods
 COPY scripts/prestart-downloads.sh /usr/local/bin/hytale-prestart-downloads
 COPY scripts/session-token-broker.sh /usr/local/bin/hytale-session-token-broker
+COPY --from=diagnostics-build /out/hytale-diagnostics /usr/local/bin/hytale-diagnostics
 COPY scripts/hytale-cli.sh /usr/local/bin/hytale-cli
 COPY --chmod=755 scripts/first-start.sh /usr/local/bin/hytale-first-start
 COPY scripts/healthcheck.sh /usr/local/bin/hytale-healthcheck

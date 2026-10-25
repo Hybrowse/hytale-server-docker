@@ -2,6 +2,10 @@
 
 Common issues and how to fix them.
 
+Start with `docker compose exec hytale hytale-cli doctor` for read-only checks.
+For a shareable JSON report, use `hytale-cli report`. See [diagnostics](diagnostics.md)
+for coverage, privacy, exit codes and optional network checks.
+
 > [!WARNING]
 > This is the most common issue. If players can't connect, check this first.
 
