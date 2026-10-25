@@ -27,7 +27,7 @@ spec:
       terminationGracePeriodSeconds: 120
       containers:
         - name: hytale-server
-          image: hybrowse/hytale-server:latest
+          image: hybrowse/hytale-server:1.2.0
           imagePullPolicy: IfNotPresent
           ports:
             - name: quic
@@ -51,5 +51,4 @@ spec:
         - name: data
           emptyDir: {}
         - name: tmp
-          emptyDir:
-            medium: Memory
+          emptyDir: {}

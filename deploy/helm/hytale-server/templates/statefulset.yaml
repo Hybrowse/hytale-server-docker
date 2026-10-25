@@ -1,3 +1,4 @@
+{{- include "hytale-server.validate" . }}
 {{- if eq .Values.workload.kind "StatefulSet" }}
 apiVersion: apps/v1
 kind: StatefulSet

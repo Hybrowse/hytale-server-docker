@@ -51,22 +51,23 @@ persistence:
   existingClaim: ""
   accessModes:
     - ReadWriteOnce
-  size: 5Gi
+  size: 20Gi
   storageClassName: ""
   annotations: {}
 
 tmp:
   enabled: true
-  emptyDir:
-    medium: Memory
+  # Disk-backed: the downloader extracts server files here.
+  emptyDir: {}
 
 probes:
   enabled: false
+  # Readiness does not restart downloads, logins or an in-place update.
   startup:
-    enabled: true
+    enabled: false
     periodSeconds: 10
     timeoutSeconds: 5
-    failureThreshold: 60
+    failureThreshold: 180
   readiness:
     enabled: true
     periodSeconds: 10

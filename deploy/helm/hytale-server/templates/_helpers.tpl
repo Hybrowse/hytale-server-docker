@@ -35,3 +35,9 @@ app.kubernetes.io/instance: {{ .Release.Name | quote }}
 {{- default "default" .Values.serviceAccount.name -}}
 {{- end -}}
 {{- end -}}
+
+{{- define "hytale-server.validate" -}}
+{{- if and .Values.persistence.enabled (gt (int .Values.replicaCount) 1) (or (eq .Values.workload.kind "Deployment") .Values.persistence.existingClaim) -}}
+{{- fail "A shared persistent data volume requires replicaCount=1. Use separate per-server volumes for multiple servers." -}}
+{{- end -}}
+{{- end -}}

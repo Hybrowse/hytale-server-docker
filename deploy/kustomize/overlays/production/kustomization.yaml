@@ -2,7 +2,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - ../../base
+  - ../probes
   - pdb.yaml
   - networkpolicy.yaml
 
@@ -15,8 +15,7 @@ patches:
         path: /spec/template/spec/volumes
         value:
           - name: tmp
-            emptyDir:
-              medium: Memory
+            emptyDir: {}
       - op: add
         path: /spec/volumeClaimTemplates
         value:
@@ -27,7 +26,7 @@ patches:
                 - ReadWriteOnce
               resources:
                 requests:
-                  storage: 5Gi
+                  storage: 20Gi
       - op: add
         path: /spec/template/spec/containers/0/env/-
         value:
