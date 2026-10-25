@@ -6,8 +6,9 @@ Start with `docker compose exec hytale hytale-cli doctor` for read-only checks.
 For a shareable JSON report, use `hytale-cli report`. See [diagnostics](diagnostics.md)
 for coverage, privacy, exit codes and optional network checks.
 
-> [!WARNING]
-> This is the most common issue. If players can't connect, check this first.
+!!! warning
+    This is the most common issue. If players can't connect, check this first.
+
 
 ## Server authentication error: "Server authentication unavailable"
 
@@ -74,8 +75,9 @@ Watch logs during first-time auth:
 docker compose logs -f hytale
 ```
 
-> [!NOTE]
-> ARM64 images include emulation for the official downloader. Java and the game server remain native; no `platform: linux/amd64` override is needed.
+!!! note
+    ARM64 images include emulation for the official downloader. Java and the game server remain native; no `platform: linux/amd64` override is needed.
+
 
 ## Expired downloader login (`invalid_grant`)
 
@@ -121,8 +123,8 @@ Common examples:
 
 - Check full container logs from startup (`docker compose logs -f hytale`), not only interactive attach output.
 - For non-interactive startup, either:
-  - seed `/data/.hytale-downloader-credentials.json` via `HYTALE_DOWNLOADER_CREDENTIALS_SRC`, or
-  - pre-provision `/data/Assets.zip` and `/data/server/HytaleServer.jar` and set `HYTALE_AUTO_DOWNLOAD=false`.
+    - seed `/data/.hytale-downloader-credentials.json` via `HYTALE_DOWNLOADER_CREDENTIALS_SRC`, or
+    - pre-provision `/data/Assets.zip` and `/data/server/HytaleServer.jar` and set `HYTALE_AUTO_DOWNLOAD=false`.
 
 ## Auto-download on ARM64 (Apple Silicon)
 
@@ -168,8 +170,9 @@ services:
     user: "1001:1001"
 ```
 
-> [!WARNING]
-> Avoid running as root (`user: "0:0"`) in production.
+!!! warning
+    Avoid running as root (`user: "0:0"`) in production.
+
 
 ## Read-only root filesystem
 
@@ -213,8 +216,9 @@ services:
 - Set `HYTALE_AUTO_DOWNLOAD=true` to let the container download them automatically.
 - Or provision files manually: [`server-files.md`](server-files.md)
 
-> [!TIP]
-> AOT errors are usually harmless with `ENABLE_AOT=auto` (default). The server will continue without AOT.
+!!! tip
+    AOT errors are usually harmless with `ENABLE_AOT=auto` (default). The server will continue without AOT.
+
 
 ## AOT cache errors on startup
 
@@ -227,7 +231,7 @@ services:
 - Delete the existing cache (`./data/server/HytaleServer.aot`) and regenerate it, or
 - Set `ENABLE_AOT=false` to disable AOT.
 
-See: [`configuration.md`](configuration.md#aot-cache)
+See: [`configuration.md`](runtime.md#aot-cache)
 
 ## High CPU usage from garbage collection
 
@@ -246,7 +250,7 @@ services:
 
 Monitor and experiment with different values.
 
-See: [`configuration.md`](configuration.md#jvm-heap-tuning)
+See: [`configuration.md`](runtime.md#heap-sizing)
 
 ## CurseForge mods: HTTP 403 when resolving download URL
 

@@ -1,4 +1,4 @@
-# Read-only diagnostics
+# Doctor and support reports
 
 Run diagnostics inside the server container:
 

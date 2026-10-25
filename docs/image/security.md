@@ -9,7 +9,7 @@ This document describes security hardening recommendations for running the `hybr
 - Prefer **least-privilege** runtime settings.
 - Avoid changes that accidentally redistribute proprietary server assets.
 
-For legal/policy notes (unofficial status, no redistribution, and operator responsibilities), see the repository [`README.md`](../../README.md).
+For legal/policy notes (unofficial status, no redistribution, and operator responsibilities), see the repository [`README.md`](https://github.com/Hybrowse/hytale-server-docker/blob/main/README.md).
 
 ## Secrets
 

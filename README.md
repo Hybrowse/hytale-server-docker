@@ -1,31 +1,12 @@
-[![Discord](https://img.shields.io/discord/1459154799407665397?label=Join%20Discord)](https://hybrowse.gg/discord)
-[![Docker Pulls](https://img.shields.io/docker/pulls/hybrowse/hytale-server)](https://hub.docker.com/r/hybrowse/hytale-server)
-
 # Hytale Server Docker Image
- 
-**🐳 Production-ready Docker image for dedicated Hytale servers.**
 
-Automatic CurseForge mod management, auto-download with smart update detection, Helm chart, CLI, easy configuration, and quick troubleshooting.
+Run the official Hytale dedicated server with automatic downloads, persistent authentication, CurseForge mod management and optional Kubernetes deployment assets. Supports AMD64 and ARM64, with native Java on both.
 
-## Hybrowse Server Stack
- 
-This image is part of the **Hybrowse Server Stack** — production-grade building blocks for running Hytale at scale:
- 
-- **Non-interactive server authentication** via [Hybrowse/hytale-session-token-broker](https://github.com/Hybrowse/hytale-session-token-broker) (mints short-lived `session_token` / `identity_token` at startup to skip the interactive `/auth` flow)
-- **Stateless QUIC entrypoint + referral routing** via [Hybrowse/hyrouter](https://github.com/Hybrowse/hyrouter)
+**[Documentation](https://hybrowse.github.io/hytale-server-docker/)** | [Quickstart](https://hybrowse.github.io/hytale-server-docker/image/quickstart/) | [Troubleshooting](https://hybrowse.github.io/hytale-server-docker/image/troubleshooting/) | [Releases](https://github.com/Hybrowse/hytale-server-docker/releases) | [Discord](https://hybrowse.gg/discord)
 
-Brought to you by [Hybrowse](https://github.com/Hybrowse) and the developer of [setupmc.com](https://setupmc.com).
+## Start a server
 
-## Image
-
-- **Image (Docker Hub)**: [`hybrowse/hytale-server`](https://hub.docker.com/r/hybrowse/hytale-server)
-- **Mirror (GHCR)**: [`ghcr.io/hybrowse/hytale-server`](https://ghcr.io/hybrowse/hytale-server)
-
-## Community
-
-Join the **Hybrowse Discord Server** to get help and stay up to date: https://hybrowse.gg/discord
-
-## Quickstart
+Save as `compose.yaml`:
 
 ```yaml
 services:
@@ -36,68 +17,33 @@ services:
     ports:
       - "5520:5520/udp"
     volumes:
-      - ./data:/data
-    tty: true
-    stdin_open: true
+      - hytale-data:/data
+    stop_grace_period: 120s
     restart: unless-stopped
+
+volumes:
+  hytale-data:
 ```
 
-```bash
+```sh
 docker compose up -d
+docker compose logs -f hytale
 ```
 
-> [!IMPORTANT]
-> **Two authentication steps required:**
->
-> 1. **Downloader auth** (first run): follow the URL + device code in the logs to download server files
-> 2. **Server auth** (first startup): follow the second URL + device code in the logs. The image starts Hytale's device login and encrypted credential storage automatically.
->
-> If your account has several profiles, choose one from the log with `docker compose exec hytale hytale-cli auth select <name-or-number>`. The login and profile are reused on later starts. Set `HYTALE_AUTO_AUTH=false` to manage login yourself.
->
-> Optional (advanced / providers): if you run **the [Hytale Session Token Broker](https://github.com/Hybrowse/hytale-session-token-broker) by Hybrowse**, you can fetch session/identity tokens at container startup and skip the interactive `/auth` flow. See: [`docs/image/configuration.md`](docs/image/configuration.md)
+Follow **two separate authorization prompts** in the logs: first the downloader, then the running server. If Hytale offers several profiles, select one with `docker compose exec hytale hytale-cli auth select <name-or-number>`. Keep the data volume to reuse the login on later starts.
 
-Full guide: [`docs/image/quickstart.md`](docs/image/quickstart.md)
+Players connect to the host on UDP port 5520. See the [full quickstart](https://hybrowse.github.io/hytale-server-docker/image/quickstart/) for login checks, networking and safe restarts. Production deployments should pin a [published image tag](https://github.com/Hybrowse/hytale-server-docker/releases).
 
-Troubleshooting: [`docs/image/troubleshooting.md`](docs/image/troubleshooting.md)
+## Images and guides
 
-Automation: you can send server console commands from scripts via `hytale-cli`:
+- [Docker Hub](https://hub.docker.com/r/hybrowse/hytale-server): `hybrowse/hytale-server`
+- [GHCR mirror](https://github.com/Hybrowse/hytale-server-docker/pkgs/container/hytale-server): `ghcr.io/hybrowse/hytale-server`
+- [Configuration](https://hybrowse.github.io/hytale-server-docker/image/configuration/), [environment variables](https://hybrowse.github.io/hytale-server-docker/reference/environment/), [Kubernetes](https://hybrowse.github.io/hytale-server-docker/image/kubernetes/), [mods](https://hybrowse.github.io/hytale-server-docker/image/curseforge-mods/), [updates](https://hybrowse.github.io/hytale-server-docker/image/upgrades/), [Doctor](https://hybrowse.github.io/hytale-server-docker/image/diagnostics/)
 
-```bash
-docker exec hytale hytale-cli send "/say Server is running!"
-```
+## Optional server stack
 
-See: [`docs/image/configuration.md`](docs/image/configuration.md#send-console-commands-hytale-cli)
+Use the [Session Token Broker](https://github.com/Hybrowse/hytale-session-token-broker) for centrally managed server authentication and [Hyrouter](https://github.com/Hybrowse/hyrouter) for client referrals to backends. Neither is required for a single server. See the [stack guide](https://hybrowse.github.io/hytale-server-docker/stack/).
 
-## Documentation
-
-- [`docs/image/quickstart.md`](docs/image/quickstart.md) — start here
-- [`docs/image/configuration.md`](docs/image/configuration.md) — environment variables, JVM tuning
-- [`docs/image/kubernetes.md`](docs/image/kubernetes.md) — Helm chart, Kustomize overlays, and Kubernetes deployment notes
-- [`docs/image/curseforge-mods.md`](docs/image/curseforge-mods.md) — automatic CurseForge mod download and updates
-- [`docs/image/diagnostics.md`](docs/image/diagnostics.md): read-only checks and support reports
-- [`docs/image/troubleshooting.md`](docs/image/troubleshooting.md) — common issues
-- [`docs/image/backups.md`](docs/image/backups.md) — backup configuration
-- [`docs/image/server-files.md`](docs/image/server-files.md) — manual provisioning of server files
-- [`docs/image/upgrades.md`](docs/image/upgrades.md) — upgrade guidance
-- [`docs/image/security.md`](docs/image/security.md) — security hardening
-
-## Why this image
-
-- **Security-first defaults** (least privilege; credentials/tokens treated as secrets)
-- **Operator UX** (clear startup validation and actionable errors)
-- **Performance-aware** (sane JVM defaults; optional AOT cache usage)
-- **Predictable operations** (documented data layout and upgrade guidance)
-
-## Java
-
-Hytale requires **Java 25**.
-This image uses **Adoptium / Eclipse Temurin 25**.
- 
-## Documentation
- 
-- [`docs/image/`](docs/image/): Image usage & configuration
-- [`docs/hytale/`](docs/hytale/): internal notes (not end-user image docs)
- 
 ## Contributing & Security
  
 - [`CONTRIBUTING.md`](CONTRIBUTING.md)

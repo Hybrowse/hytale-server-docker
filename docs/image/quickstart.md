@@ -1,8 +1,10 @@
-# Quickstart
+# Start a server with Docker Compose
 
-## 1. Docker Compose
+This guide starts one server, stores its data in a Docker volume and walks through both first-time logins. You need Docker with Compose and a Hytale account that can authorize a dedicated server.
 
-Hytale uses **QUIC over UDP** (not TCP). Publish `5520/udp`.
+## 1. Create the service
+
+Save this complete example as `compose.yaml` in an empty directory:
 
 ```yaml
 services:
@@ -13,95 +15,73 @@ services:
     ports:
       - "5520:5520/udp"
     volumes:
-      - ./data:/data
-    tty: true
-    stdin_open: true
+      - hytale-data:/data
+    stop_grace_period: 120s
     restart: unless-stopped
+
+volumes:
+  hytale-data:
 ```
 
-```bash
+The named volume avoids host-directory ownership problems on first startup. To use a bind mount instead, follow [data and permissions](data.md). For production, replace `latest` with a specific [published image tag](https://github.com/Hybrowse/hytale-server-docker/releases).
+
+Start the container and watch its logs:
+
+```sh
 docker compose up -d
-```
-
-> [!NOTE]
-> On first run, the official downloader prints an authorization URL + device code in the logs.
-> After you complete this once, credentials are stored and future runs are non-interactive.
-
-## 2. Downloader authentication (first-time only)
-
-Watch logs:
-
-```bash
 docker compose logs -f hytale
 ```
 
-Open the URL in your browser and enter the device code. After completion, the download proceeds automatically.
+On AMD64 and ARM64, use the native image. Do not add `platform: linux/amd64` on Apple Silicon. You do not need privileged mode, a terminal attachment or a local Java installation.
 
-On subsequent runs, this step is skipped (credentials are stored on the `/data` volume).
+## 2. Authorize the downloader
 
-> [!TIP]
-> For non-interactive setups, seed credentials via `HYTALE_DOWNLOADER_CREDENTIALS_SRC` (mounted secret), or pre-provision `Assets.zip` and `Server/` and set `HYTALE_AUTO_DOWNLOAD=false`.
+Open the authorization URL printed in the logs and confirm the displayed code. The official downloader obtains the server files and assets. This can take several minutes and needs several gigabytes of free storage.
 
-> [!NOTE]
-> **Apple Silicon / ARM64:** Use the native image. It emulates only the official downloader; Java stays native. No `platform: linux/amd64` setting is needed. Manual provisioning is also supported: [`server-files.md`](server-files.md)
+Downloader credentials are saved on `/data` and reused on later starts. They are independent of the server login in the next step.
 
-> [!IMPORTANT]
-> **After** the server starts, you must authenticate it before players can connect.
-> If you skip this step, players will see: *"Server authentication unavailable - please try again later"*
->
-> Provider/fleet option: if you use **the [Hytale Session Token Broker](https://github.com/Hybrowse/hytale-session-token-broker) by Hybrowse**, you can fetch `HYTALE_SERVER_SESSION_TOKEN` / `HYTALE_SERVER_IDENTITY_TOKEN` at container startup and skip the interactive `/auth` flow.
-> See: [`configuration.md`](configuration.md#optional-session-token-broker-skip-auth)
+If downloading stops with `invalid_grant`, use [downloader login recovery](troubleshooting.md#expired-downloader-login-invalid_grant). If you already have the official files, use [manual provisioning](server-files.md) instead.
 
-## 3. Server authentication (required for player connections)
+## 3. Authorize the running server
 
-On a fresh authenticated server, the image starts Hytale's own device login and
-selects encrypted credential storage automatically. Follow the URL and code in
-`docker compose logs -f`. With auto-download, the downloader shows its own login
-first; the server login is a separate authorization.
+After the download, Java starts and the image automatically requests Hytale's device login with encrypted persistence. Follow this **second** authorization URL in the logs.
 
-If several profiles are listed, choose one by its displayed name or number:
+If your account has several profiles, select one using the name or number Hytale displays:
 
-```bash
+```sh
 docker compose exec hytale hytale-cli auth select ExamplePlayer
 ```
 
-Check the result in the logs, or request status:
+Request live authentication status, then read the result in the logs:
 
-```bash
+```sh
 docker compose exec hytale hytale-cli auth status
-docker compose logs --tail 50
+docker compose logs --tail 50 hytale
 ```
 
-Keep `/data`, including `server/auth.enc`, the saved configuration and
-`.machine-id`, so Hytale can reuse the selected profile after a restart.
-If Hytale uses `server/auth.key` or `HYTALE_AUTH_KEY_FILE`, preserve that secret too.
-Do not delete these files to recover a downloader login; that uses separate credentials.
+Look for Hytale's authentication-success message. A running container or a healthy probe alone does not establish that players can join.
 
-To start another device login without attaching to the console:
+The login, selected profile and machine identity remain on the data volume. Do not delete the volume to resolve a downloader error. For manual login or automated fleets, see [authentication](authentication.md).
 
-```bash
-docker compose exec hytale hytale-cli auth login
+## 4. Connect
+
+In Hytale Direct Connect, enter the Docker host's address and port `5520`. When the client runs on the same host, use `127.0.0.1:5520`. For another computer, use the host's reachable LAN or public address.
+
+For internet access, forward **UDP 5520** to the Docker host and allow it in the host firewall. Forwarding TCP alone is insufficient. See [networking](networking.md) if local connections work but remote ones fail.
+
+## 5. Stop and restart safely
+
+```sh
+docker compose stop hytale
+docker compose up -d hytale
 ```
 
-`HYTALE_AUTO_AUTH=false` keeps the manual flow. Automatic login is also skipped
-for offline mode, supplied server tokens, an enabled broker, an existing
-`server/auth.enc`, and validation/schema/help commands. It requires the default
-`HYTALE_CONSOLE_PIPE=true`; disabling the pipe leaves console login under your control.
-
-
-## Done!
-
-Players can now connect.
-
-## Automation (optional)
-
-If you want to run server console commands from scripts (for example before planned restarts), this image includes `hytale-cli`.
-
-See: [`configuration.md`](configuration.md#send-console-commands-hytale-cli)
+The same volume is reused, so normal restarts should not need a new login. `docker compose down` also retains the named volume; `docker compose down --volumes` deletes it and its server data.
 
 ## Next steps
 
-- [`configuration.md`](configuration.md) — environment variables, JVM tuning, backups
-- [`curseforge-mods.md`](curseforge-mods.md) — automatic CurseForge mod download and updates
-- [`troubleshooting.md`](troubleshooting.md) — common issues and fixes
-- [`server-files.md`](server-files.md) — manual provisioning (if not using auto-download)
+- [Configure server name, player limit and JSON files](config-files.md).
+- [Set memory limits and heap size](runtime.md).
+- [Install CurseForge mods](curseforge-mods.md).
+- [Choose an update method](upgrades.md).
+- [Run Doctor](diagnostics.md) for read-only checks and support reports.

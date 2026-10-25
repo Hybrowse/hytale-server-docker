@@ -13,3 +13,13 @@ hytale-downloader-*
 
 .windsurf/
 .claude/
+
+.venv-docs/
+site/
+.cache/
+.pages/
+.previous-pages/
+
+.playwright-cli/
+output/playwright/
+__pycache__/
