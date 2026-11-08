@@ -7,7 +7,7 @@ ARG TARGETARCH
 ARG HYTALE_IMAGE_VERSION=development
 RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH:-amd64} go build -trimpath -ldflags "-s -w -X main.imageVersion=${HYTALE_IMAGE_VERSION}" -o /out/hytale-diagnostics .
 
-FROM eclipse-temurin:25-jre-noble@sha256:3f2223fe04b750aa5a8179e29b5c9a1ddf7665fc9bb08bfe11ad01d143bc13a5
+FROM eclipse-temurin:25-jre-noble@sha256:a98128a57de944a72bd31fbc79b898edd5a5864d3652071d5bbd2160ab7d7dce
 
 ARG TARGETARCH
 
